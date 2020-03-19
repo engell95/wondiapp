@@ -1,7 +1,7 @@
 import {FETCHING_DATA_LOGIN, FETCHING_DATA_SUCCESS_LOGIN, FETCHING_DATA_FAILURE_LOGIN} from '../constants'
 
 const initialState =  {
-    data: [],
+    item: [],
     isFeching: true,
     error: false
 }
@@ -11,13 +11,13 @@ export default loginReducer = (state = initialState, action) => {
         case FETCHING_DATA_LOGIN:
             return {
                 ...state,
-                data: [],
+                item: [],
                 isFeching: true
             }
         case FETCHING_DATA_SUCCESS_LOGIN:
             return {
                 ...state,
-                data: action.data,
+                item: action.data,
                 isFeching: false
             }
         case FETCHING_DATA_FAILURE_LOGIN:

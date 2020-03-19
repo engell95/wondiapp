@@ -1,53 +1,55 @@
 import React, {Component} from 'react'
-import {TouchableOpacity,Modal,Image,StatusBar,ScrollView,Animated,Dimensions,StyleSheet,View} from 'react-native';
-import {Icon} from 'native-base';
-//Estilos
-import globals from "../../styles/globals";
+import {TouchableOpacity,Modal,Image,StatusBar,ScrollView,Animated,StyleSheet,View} from 'react-native';
+import {Icon,Text,Block} from 'galio-framework';
+import design from '@config/style/Style';
+import ImageViewer from './zoom/image-viewer.component';
 
-const deviceWidth = Dimensions.get('window').width
 const FIXED_BAR_WIDTH = 280
 const BAR_SPACE = 10
+const logo = require('@assets/img/logo3.png');
 
 class Fullimgcomponent extends Component {
 
-  numItems = this.props.imagenes.length
-  itemWidth = (FIXED_BAR_WIDTH / this.numItems) - ((this.numItems - 1) * BAR_SPACE)
-  itemWidth2 = (FIXED_BAR_WIDTH / 1) - ((1 - 1) * BAR_SPACE)
-  animVal = new Animated.Value(0)
-
-	constructor(props) {super(props)
-		this.state = {
+  //inicializar variables
+  constructor(props) {super(props)
+    this.state = {
       pagination: 0,
       img: props.imagenes
-	  };
+    };
   }
 
+  numItems    = this.props.imagenes.length
+  itemWidth   = (FIXED_BAR_WIDTH / this.numItems) - ((this.numItems - 1) * BAR_SPACE)
+  itemWidth2  = (FIXED_BAR_WIDTH / 1) - ((1 - 1) * BAR_SPACE)
+  animVal     = new Animated.Value(0)
+
+  //ciclos de vida
   componentDidUpdate(prevProps) {
     if (this.props.imagenes !== prevProps.imagenes) {
       this.setState({img:this.props.imagenes})
     }
   }
 
-  closemodal = () => {
-  	this.props.close();
-  }
+  //funcion para cerrar componente
+  closemodal = () => {this.props.close();}
 
 	render() {
+
+    
     let imageArray = []
     let barArray = []
-
     if (this.props.imagenes && this.props.imagenes.length) {
       this.state.img.forEach((image, i) => {
         const thisImage = (
           <Image
             key={`image${i}`}
             source={{uri: image.URL_Imagen}}
-            style={{ width: deviceWidth }}
+            style={{ width: design.width }}
           />
         )
         imageArray.push(thisImage)
         const scrollBarVal = this.animVal.interpolate({
-          inputRange: [deviceWidth * (i - 1), deviceWidth * (i + 1)],
+          inputRange: [design.width * (i - 1), design.width * (i + 1)],
           outputRange: [-this.itemWidth, this.itemWidth],
           extrapolate: 'clamp',
         })
@@ -69,18 +71,60 @@ class Fullimgcomponent extends Component {
         barArray.push(thisBar)
       })  
     }
-    else{
+    else if (this.props.destacado && this.props.destacado.length){
       const thisImage = (
         <Image
           key={'image0'}
           source={{uri: this.props.destacado}}
-          style={{ width: deviceWidth }}
+          style={{ width: design.width }}
         />
       )
       imageArray.push(thisImage)
 
       const scrollBarVal = this.animVal.interpolate({
-        inputRange: [deviceWidth * (0 - 1), deviceWidth * (0 + 1)],
+        inputRange: [design.width * (0 - 1), design.width * (0 + 1)],
+        outputRange: [-this.itemWidth2, this.itemWidth2],
+        extrapolate: 'clamp',
+      })
+
+      const thisBar = (
+        <View
+          key={'bar0'}
+          style={[
+            styles.track,
+            {
+              width: this.itemWidth2,
+              marginLeft: 0 === 0 ? 0 : BAR_SPACE,
+            },
+          ]}
+        >
+          <Animated.View
+            style={[
+              styles.bar,
+              {
+                width: this.itemWidth2,
+                transform: [
+                  { translateX: scrollBarVal },
+                ],
+              },
+            ]}
+          />
+        </View>
+      )
+      barArray.push(thisBar)
+    }
+    else{
+      const thisImage = (
+        <Image
+          key={'image0'}
+          source={logo}
+          style={{ width: design.width }}
+        />
+      )
+      imageArray.push(thisImage)
+
+      const scrollBarVal = this.animVal.interpolate({
+        inputRange: [design.width * (0 - 1), design.width * (0 + 1)],
         outputRange: [-this.itemWidth2, this.itemWidth2],
         extrapolate: 'clamp',
       })
@@ -121,29 +165,58 @@ class Fullimgcomponent extends Component {
         onPress={() => this.closemodal()}
       >
 		    <StatusBar backgroundColor="black" barStyle="light-content" />
-		    <TouchableOpacity onPress={() => {this.props.close();}} style={globals.cont_full_ico}>
-		      <Icon name='md-close' style={globals.full_ico}/>
-		    </TouchableOpacity>
-        <View style={globals.contenedor_full}>       
-          <View style={globals.imgfull}>          
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              scrollEventThrottle={10}
-              pagingEnabled
-              onScroll={
-                Animated.event(
-                  [{ nativeEvent: { contentOffset: { x: this.animVal } } }]
-                )
-              }
-            >
-              {imageArray}
-            </ScrollView>
+		    {this.props.imagenes && this.props.imagenes.length
+          ?<ImageViewer 
+            imageUrls={this.state.img}
+            failImageSource={logo}
+            loadingRender={() => <Text>Cargando</Text>}
+            onCancel={() =>this.props.close()}
+            renderHeader={() => 
+              <Block style={{marginLeft:design.width * 0.02,marginRight:design.width * 0.02,marginTop:10,position: 'absolute', zIndex: 1}}>
+                <TouchableOpacity onPress={() => this.closemodal()}>
+                  <Icon
+                    family='antdesign'
+                    color={design.theme.COLORS.MUTED}
+                    size={design.theme.SIZES.BASE * 2}
+                    name='closecircle'
+                  />
+                </TouchableOpacity>  
+              </Block>
+            }
+           />
+          :<View style={{flex: 1,backgroundColor:'black'}}>
+          <Block style={{marginLeft:design.width * 0.02,marginRight:design.width * 0.02,marginTop:10,position: 'absolute', zIndex: 1}}>
+              <TouchableOpacity onPress={() => this.props.close()}>
+                <Icon
+                  family='antdesign'
+                  color={design.theme.COLORS.MUTED}
+                  size={design.theme.SIZES.BASE * 2}
+                  name='closecircle'
+                />
+              </TouchableOpacity>  
+          </Block>
+          <View style={{flex: 1,justifyContent: 'center',alignItems: 'center',flexDirection:'column'}}>       
+            <View style={{marginTop:design.height * 0.20}}>          
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                scrollEventThrottle={10}
+                pagingEnabled
+                onScroll={
+                  Animated.event(
+                    [{ nativeEvent: { contentOffset: { x: this.animVal } } }]
+                  )
+                }
+              >
+                {imageArray}
+              </ScrollView>
+            </View>
+            <View style={styles.barContainer}>
+              {barArray}
+            </View>
           </View>
-          <View style={styles.barContainer}>
-            {barArray}
           </View>
-        </View>
+        }
       </Modal>
 		)
 	}

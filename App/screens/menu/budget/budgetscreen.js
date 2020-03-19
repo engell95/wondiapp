@@ -1,364 +1,400 @@
-import React, {Component} from 'react';
-import {Share,FlatList,TouchableOpacity,RefreshControl,StatusBar,NetInfo,Image,Alert,Picker} from 'react-native';
-import {Button,Icon,H1,Fab,Col,Item,Grid,Text,View,ActionSheet,Right} from 'native-base';
-//General
-import OfflineNotice from "../../../components/general/offlinecomponent";
-import Load from '../../../components/loader/loadercomponent';
-import ProgressiveImage from '../../../components/image/progressiveimagecomponent';
-import Modalcartnew from '../../../components/shoppingcart/modalnewcartcomponent';
-//Redux
-import {fetchDataBudget} from '../../../redux/actions/budgetaction';
-import {destroybudget} from '../../../redux/actions/mainaction';
+import React, {PureComponent} from 'react';
+import {ScrollView,Share,FlatList,TouchableOpacity,RefreshControl,StatusBar,NetInfo,Image,Alert,Picker,StyleSheet,View,WebView,ActivityIndicator} from 'react-native';
+import {Block, Button,Input,NavBar,Icon,Card,theme,Text} from 'galio-framework';
+import design from '@config/style/Style';
+import {loadSettings} from '@config/SettingsStorage';
+import Load from '@components/general/LoaderComponent';
+import ProgressiveImage from '@components/image/AsyncImageComponent';
+import Modalcartnew from '@components/shoppingcart/modalnewcartcomponent';
+import Swipeable from '@components/general/SwipeableComponent';
+import AsyncStorage from '@react-native-community/async-storage';
+import {fetchDataBudget} from '@redux/actions/BudgetAction';
+import {destroybudget} from '@redux/actions/MainAction';
 import {connect} from 'react-redux';
-import globals from "../../../styles/globals";
-//idioma
-import I18n from '../../../config/LanguageService';
-import {loadSettings} from '../../../config/SettingsStorage';
 
-const viewabilityConfig = {
-  minimumViewTime: 3000,
-  viewAreaCoveragePercentThreshold: 100,
-  waitForInteraction: true,
-};
+const fondo   = require('@assets/img/fondo.png');
+const carga   = require('@assets/img/carga.png');
+const logo    = require('@assets/img/logo3.png');
+const sharei  = require('@assets/img/iconos/share.png');
+const deletei = require('@assets/img/iconos/basura.png');
+const presui  = [
+  require('@assets/img/iconos/Writing.png'),
+  require('@assets/img/iconos/Baby.png'),
+  require('@assets/img/iconos/Box.png'),
+  require('@assets/img/iconos/Car.png'),
+  require('@assets/img/iconos/Cashier.png'),
+  require('@assets/img/iconos/Credit_Cart.png'),
+  require('@assets/img/iconos/Gift_2.png'),
+  require('@assets/img/iconos/Gift.png'),
+  require('@assets/img/iconos/Groceries.png'),
+  require('@assets/img/iconos/Porcent.png'),
+  require('@assets/img/iconos/Saving.png'),
+  require('@assets/img/iconos/Serving_Dish.png'),
+  require('@assets/img/iconos/Shopping.png'),
+  require('@assets/img/iconos/Tools.png'),
+  require('@assets/img/iconos/Wallet.png')
+];
 
 const ICON_PLUS_BASE64 = 'https://ibb.co/gDhQ554'
 
-function filter1(property) {
-  var sortOrder = 1;
-  if(property[0] === "-") {
-    sortOrder = -1;
-    property = property.substr(1);
-  }
-  return function (a,b) {
-    var result = (a[property] > b[property]) ? -1 : (a[property] < b[property]) ? 1 : 0;
-    return result * sortOrder;
-  }
-}
+class Budget extends PureComponent {
 
-function filter2(property) {
-  var sortOrder = 1;
-  if(property[0] === "-") {
-    sortOrder = -1;
-    property = property.substr(1);
-  }
-  return function (a,b) {
-    var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-    return result * sortOrder;
-  }
-}
+  swipeable = null;
 
-class Budget extends React.Component {
-  _isMounted = false;
-
-  constructor(props) {
-    super(props)
+  //inicializar variables
+  constructor(props) {super(props)
     this.state = {
-      isConnected: true,
       refreshing: false,
-      data: [], 
+      languaje:'',
       user:'',
       token:'',
-      loader:true,
-      languaje:'',
-      newmodalbug:false,
-      datamodal:[],
-      openfix:false,
-      selected: "1"
+      notif:'',
+      currentlyOpenSwipeable: null,
+      newmodalbug:false
     };
   }
 
-   onValueChange(value: string) {
-    if (this._isMounted){
-      if (value == '2') {
-        var dataold = this.props.budget.item.data;
-        this.setState({data: dataold.sort(filter1("Cod_Presupuesto"))});
-      }
-      else if (value == '3') {
-        var dataold = this.props.budget.item.data;
-        this.setState({data: dataold.sort(filter2("Cod_Presupuesto"))});
-      }
-      this.setState({selected: value});
-    }
-  }
-
-  static navigationOptions = ({ navigation, screenProps }) => ({
-    headerTitle: (
-      <View style={globals.view_nav}>
-        <Image style={globals.logo_header_b} resizeMode="contain" source={require("../../../src/general/header.png")} />
-      </View>
-    ),
-    headerRight:( 
-      <Button transparent style={globals.fix_ico} onPress={() => navigation.navigate("Search")}>
-        <Icon name='search' style={globals.ico_search} />
-      </Button>
-    ),
-    headerTitleStyle: (globals.nav),
-    headerStyle: (globals.navstyle),
-    headerTintColor: (globals.navstyle.color),
-  })
+  //ciclos de vida
+  componentWillMount(){this.verifiuser();}
 
   componentDidMount() {
-    this._isMounted = true;
-    NetInfo.isConnected.addEventListener('connectionChange', this.handleConnectionChange);
-    NetInfo.isConnected.fetch().done((isConnected) => { this.setState({isConnected}); });
     this.subs = [
       this.props.navigation.addListener('willFocus', () => {
-         this.verifiuser();
+        this.verifiuser();
       }),
     ];
-  } 
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    this.subs.forEach(sub => sub.remove());
-    NetInfo.isConnected.removeEventListener('connectionChange', this.handleConnectionChange);
   }
 
-  componentWillMount(){ 
-    this.verifiuser();
-  }
-
-  async verifiuser() { 
-    const settings = await loadSettings();
-    if (settings !== null) {
-      if (settings.languaje !== null){
-        I18n.locale = settings.languaje
-      }
-      this.setState({user:settings.user,languaje:settings.languaje,token:settings.token,notif:settings.notif})
-      this.props.fetchDataBudget(settings.user);
-    }
-  }
+  componentWillUnmount() {this.subs.forEach(sub => sub.remove());}
 
   componentWillReceiveProps(newProps){
-    if (newProps.budget.isFeching == false) {
-      if(newProps.budget.item.data !== this.props.budget.item.data){
-        this.setState({data: newProps.budget.item.data,loader:false});
+    if(newProps.budget.item.data !== this.props.budget.item.data){
+      this.setState({data: newProps.budget.item.data});
+    }
+  }
+
+  //verificando datos del usuario y llamando apis
+  async verifiuser(){ 
+    try{
+      const settings = await loadSettings();
+      if (settings !== null) {
+        if (settings.user !== null & settings.token !== null){
+          this.setState({user:settings.user,languaje:settings.languaje,token:settings.token,notif:settings.notif})
+          this.props.fetchDataBudget(settings.user);
+        }
       }
-      else if (newProps.budget.isFeching == false) {
-        this.setState({loader:false});
-      }
+    }
+    catch(error) {
+      Alert.alert('Algo salió mal', 'Ayúdanos a mejorar esta aplicación, mándanos un email a soporte@wondiapp.com con una captura de pantalla del error. Gracias ... \n\n' + error.toString() ,)
     }
   }
 
-  handleConnectionChange = (isConnected) => {
-    if (this._isMounted){
-      this.setState({isConnected });
-    }
-  }
-
-  destroybudget = (id,index) => {
-    if (this._isMounted){
-      this.props.destroybudget({id:id,user:this.state.user,token:this.state.token,languaje:this.state.languaje});
-      const newIds = this.state.data.slice();
-      newIds.splice(index,1);
-      this.setState({data:newIds})
-    }
-  }
-
-  _onRefresh = () => {
-    if (this._isMounted){
-      this.setState({refreshing: true,loader:true});
+  //refrescando apis
+  async _onRefresh() {
+    try{
       this.props.fetchDataBudget(this.state.user);
-      if (this.state.loader = true) {
-        this.setState({refreshing: false})
-      }
-      else{
-        this.setState({refreshing: true})
-      }
     }
+    catch(error) {
+      Alert.alert('Algo salió mal', 'Ayúdanos a mejorar esta aplicación, mándanos un email a soporte@wondiapp.com con una captura de pantalla del error. Gracias ... \n\n' + error.toString() ,)
+    }
+    finally{
+      this.setState( { refreshing: false } );
+    }
+  }  
+
+  //eliminar presupuesto
+  destroybudget = (id,index) => {
+    this.props.destroybudget({id:id,user:this.state.user,token:this.state.token,languaje:this.state.languaje});
+    const newIds = this.state.data.slice();
+    newIds.splice(index,1);
+    this.setState({data:newIds})
+    this.swipeable.recenter();
+    this.state.currentlyOpenSwipeable.recenter();
   }
 
-  _renderBudget(item,index){
-    return(
-      <View style={globals.containerbudget}>
-        <View style={globals.viewbudget}>
-          <Grid style={{margin:10}}>
-            <Col>
-              <TouchableOpacity onPress={() => {this.props.navigation.navigate("Budget_det",{name_shopping:item.N_Presupuesto,id_budget:item.Cod_Presupuesto,token:this.state.token,user:this.state.user,languaje:this.state.languaje})}}>
-                <Image  key = {item.Cod_Presupuesto} style={globals.imgbudget} source={require("../../../src/general/buget.png")}/>
-              </TouchableOpacity> 
-              <View style={globals.viewico}>
-                <TouchableOpacity 
-                    onPress={()=>{this.onShare(item.N_Presupuesto)}}>
-                    <Icon name="ios-share-alt" style={globals.icoshare}/>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    onPress={()=>{
-                      Alert.alert(
-                          I18n.t('budget.mdelete'),
-                          item.N_Presupuesto,
-                          [
-                            {text: I18n.t('global.cancel'), onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-                            {text: I18n.t('global.delete'), onPress: () => this.destroybudget(item.Cod_Presupuesto,index), style: 'destructive'},
-                          ],
-                          { cancelable: false }
-                      )
-                    }}>
-                    <Icon name="trash" style={globals.icoshare}/>
-                </TouchableOpacity>
-              </View>
-            </Col>
-            <TouchableOpacity onPress={() => {this.props.navigation.navigate("Budget_det",{name_shopping:item.N_Presupuesto,id_budget:item.Cod_Presupuesto,token:this.state.token,user:this.state.user,languaje:this.state.languaje})}}>
-            <Col style={{alignItems:'flex-end'}}>
-            <Text numberOfLines={1} style={[globals.textotal,{paddingTop:0}]} >{item.N_Presupuesto}</Text>
-             {item.Fecha_Compra
-                  ?<Text numberOfLines={1} style={globals.text} >{item.Fecha_Compra}</Text>
-                  :<Text></Text>
-                }
-                {item.Monto_Total.C$
-                  ?<Text numberOfLines={1} style={[globals.textprec,{paddingTop:5,width:'100%'}]} >{item.Monto_Total.C$.Moneda} {item.Monto_Total.C$.Monto.toFixed(2)}</Text>
-                  :<Text style={[globals.textprec,{paddingTop:5}]}></Text>
-                }
-                {item.Total_Productos
-                  ?<Text numberOfLines={1} style={globals.text} >U {item.Total_Productos}</Text>
-                  :<Text></Text>
-                }
-            </Col>
-            </TouchableOpacity>
-          </Grid>
-        </View>
-      </View>
-    )
-  }
-
-  onShare = async (N_Presupuesto) => {
-    let message = I18n.t('global.sharei')+' '+N_Presupuesto+' '+I18n.t('global.sharel');
+  //compartir presupuesto
+  onShare = async (N_Presupuesto,und) => {
+    let message = 'Hola mira todo lo que puedes ahorrar con esta app mi presupuesto'+' '+N_Presupuesto+' '+'tiene mas de'+' '+und+' '+'productos con muchos ahorros no esperes mas descarga la app en en Google Play';
     try {
       const result = await Share.share({
        message:message + ICON_PLUS_BASE64,
        url: message + ICON_PLUS_BASE64,
-       title: I18n.t('global.sharetitle')
+       title: "Ahorremos enserio"
       }, 
       {
         type: 'image/png',
         // Android only:
-        dialogTitle: I18n.t('global.sharetitledialog'),
+        dialogTitle: "Comparte tu ahorro",
         // iOS only:
         excludedActivityTypes: [
           'com.apple.UIKit.activity.PostToTwitter'
         ]
       });
-    } catch (error) {
+    } catch (error) {0
       alert(error.message);
+    }
+    this.swipeable.recenter();
+    this.state.currentlyOpenSwipeable.recenter();
+  };
+
+  //funcion Swipeable
+  handleScroll = () => {
+    const {currentlyOpenSwipeable} = this.state;
+    if (currentlyOpenSwipeable) {
+      currentlyOpenSwipeable.recenter();
     }
   };
 
-  openmodal = () => {
-    if (this._isMounted){
-      this.setState({datamodal:{languaje:this.state.languaje,user:this.state.user,token:this.state.token},newmodalbug:true,openfix:true})
-    }
-  }
-
-  closemodal = () =>{
-    if (this._isMounted){
-      this.setState({newmodalbug:false,openfix:false})
-    }
-  }
-
-  closemodal2 = async () => {
-    if (this._isMounted) {
-      try {
-        await this.setState({newmodalbug:false,openfix:false})
-        await this.props.navigation.navigate("Search");
-      }
-      catch (error) {
-      }
-    }
-  }
-
-  _rendermodal(modal){
-    if (modal == false) {
-      return null
+  imgnum(index){
+    if (index > 16) {
+      return presui[1]
     }
     else{
-      return <Modalcartnew newmodal2={this.state.newmodalbug} data={this.state.datamodal} closemodal={this.closemodal.bind(this)} closemodal2={this.closemodal2.bind(this)}/>
+      return presui[index]
+    }
+  }
+
+  handleUserBeganScrollingParentView() {this.swipeable.recenter();}
+
+  //funcion video de la app
+  onShouldStartLoadWithRequest = (navigator) => {
+    if (navigator.url.indexOf('embed') !== -1) 
+    {
+      return true;
+    } else {
+      this.videoPlayer.stopLoading();
+      return false;
+    }    
+  }
+
+  //diseño de los item de prespuesto
+  renderBudget(item,index,itemProps){
+    return( 
+      <Block style={{marginBottom:20}} key={index}>
+        <Swipeable
+          key={index}
+          onRef={ref => this.swipeable = ref}
+          leftButtons={[
+            <TouchableOpacity 
+              key={index}
+              onPress={()=>{
+                Alert.alert(
+                  '¿Estas seguro de borrar el presupuesto?',
+                  item.N_Presupuesto,
+                  [
+                    {text: 'Cancelar', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+                    {text: 'Eiminar', onPress: () => this.destroybudget(item.Cod_Presupuesto,index), style: 'destructive'},
+                  ],
+                  { cancelable: false }
+                )
+              }} 
+              style={design.style.leftSwipeItem}
+            >
+              <Image
+                key={index}
+                style={design.style.iconleftswipe}
+                source={deletei}
+              />
+            </TouchableOpacity>
+          ]}
+          rightButtons={[
+            <TouchableOpacity key={index} onPress={()=>{this.onShare(item.N_Presupuesto,item.Total_Productos)}} style={design.style.rightSwipeItem}>
+              <Image
+                key={index}
+                style={design.style.iconrightswipe}
+                source={sharei}
+              />
+            </TouchableOpacity>
+          ]}
+          onRightButtonsOpenRelease={itemProps.onOpen}
+          onRightButtonsCloseRelease={itemProps.onClose}
+          onLeftButtonsOpenRelease={itemProps.onOpen}
+          onLeftButtonsCloseRelease={itemProps.onClose}
+          swipeStartMinLeftEdgeClearance={10}
+          swipeStartMinRightEdgeClearance={10}
+          onSwipeStart={()   => this.setState({isSwiping: true})}
+          onSwipeRelease={() => this.setState({isSwiping: false})}
+        >
+          <TouchableOpacity onPress={() => {this.props.navigation.navigate("Budget_det",{name_shopping:item.N_Presupuesto,id_budget:item.Cod_Presupuesto,token:this.state.token,user:this.state.user,languaje:this.state.languaje})}}>
+            <Block key={index} style={design.style.cardbugdet}>
+              <Block center style={design.style.part1}>
+                <Image
+                  style={design.style.partimg}
+                  source={this.imgnum(index)}
+                />
+              </Block>
+              <Block style={design.style.part3}>
+                <Text color={design.theme.COLORS.BLACK} h4 style={design.style.textpop2}>
+                 {item.N_Presupuesto}
+                </Text>
+                <Text color={design.theme.COLORS.MUTED} h5 style={design.style.textpop2}>
+                 {item.Total_Productos} artículos en lista
+                </Text>
+                {item.Monto_Total.C$ && item.Monto_Total.U$
+                  ?<Block style={{flexDirection: 'row',justifyContent: 'space-between'}}>
+                     <Text color={design.theme.COLORS.MUTED} h5 style={design.style.textpop2}>{item.Monto_Total.C$.Moneda} {item.Monto_Total.C$.Monto.toFixed(2)}</Text>
+                     <Text color={design.theme.COLORS.MUTED} h5 style={design.style.textpop2}>{item.Monto_Total.U$.Moneda} {item.Monto_Total.U$.Monto.toFixed(2)}</Text>
+                   </Block>
+                  :(item.Monto_Total.C$
+                    ?<Text color={design.theme.COLORS.MUTED} h5 style={design.style.textpop2}>{item.Monto_Total.C$.Moneda} {item.Monto_Total.C$.Monto.toFixed(2)}</Text>
+                    :(item.Monto_Total.U$
+                      ?<Text color={design.theme.COLORS.MUTED} h5 style={design.style.textpop2}>{item.Monto_Total.U$.Moneda} {item.Monto_Total.U$.Monto.toFixed(2)}</Text>
+                      :null
+                    )
+                  )
+                }
+              </Block>
+              <Block style={design.style.part2}>
+                <TouchableOpacity  onPress={() => {this.props.navigation.navigate("Budget_det",{name_shopping:item.N_Presupuesto,id_budget:item.Cod_Presupuesto,token:this.state.token,user:this.state.user,languaje:this.state.languaje})}}>
+                  <Icon name="angle-right" family="font-awesome" color={design.theme.COLORS.MUTED} size={40} />
+                </TouchableOpacity>
+              </Block>
+            </Block>
+          </TouchableOpacity>
+        </Swipeable>
+      </Block>
+    )
+  }
+
+  //demostracion de la app
+  renderError() {
+    return (
+      <Block flex center>
+        <Block flex middle>
+          <Text>Ups. a ocurrido un error</Text>
+        </Block>
+      </Block>
+    );
+  }
+
+  renderLoadingView() {
+    return (
+      <Block flex center>
+        <Block flex middle>
+          <ActivityIndicator size="large" color="#0000ff"/>
+        </Block>
+      </Block>
+    );
+  }
+
+  closemodal = () =>{ this.setState({newmodalbug:false})}
+
+  closemodalupdate = () =>{
+    this.props.fetchDataBudget(this.state.user);
+    this.setState({newmodalbug:false})
+  }
+
+  async closemodal2(){
+    try {
+      await this.setState({newmodalbug:false})
+      await this.props.navigation.navigate("Search");
+    }
+    catch(error) {
+      Alert.alert('Algo salió mal', 'Ayúdanos a mejorar esta aplicación, mándanos un email a soporte@wondiapp.com con una captura de pantalla del error. Gracias ... \n\n' + error.toString() ,)
+    }
+  }
+
+  openmodal = () => {
+    this.setState({datamodal:{languaje:this.state.languaje,user:this.state.user,token:this.state.token},newmodalbug:true})
+  }
+
+  rendermodal(active){
+    if (active == true) {
+      return <Modalcartnew newmodal2={active} data={this.state.datamodal} closemodalupdate={this.closemodalupdate.bind(this)} closemodal={this.closemodal.bind(this)} closemodal2={this.closemodal2.bind(this)}/> 
+    }
+    else{
+      return null
     }
   }
 
   render() {
-    if (!this.state.isConnected) {
-      return <OfflineNotice/>;
-    } 
 
-    if (this.state.loader == true & this.state.refreshing == false){
-      return <Load refreshing={this.state.refreshing} _onRefresh={this._onRefresh.bind(this)}/>;
+    const {currentlyOpenSwipeable} = this.state;
+
+    const itemProps = {
+      onOpen: (event, gestureState, swipeable) => {
+        if (currentlyOpenSwipeable && currentlyOpenSwipeable !== swipeable) {
+          currentlyOpenSwipeable.recenter();
+        }
+        this.setState({currentlyOpenSwipeable: swipeable});
+      },
+      onClose: () => this.setState({currentlyOpenSwipeable: null})
+    };
+
+    if (this.props.budget.isFeching) {
+      return <Load/>
     }
 
     return(
-      <View style={globals.body}>
+      <Block style={{flex: 1}}> 
+        {this.rendermodal(this.state.newmodalbug)}
         {this.state.data && this.state.data.length 
-           ?<View style={globals.contenttop}>
-            <FlatList
-              data={this.state.data}
-              refreshControl={
-                <RefreshControl
-                  refreshing={this.state.refreshing}
-                  onRefresh={this._onRefresh.bind(this)}
-                  colors={[globals.refresh.color,globals.refresh.backgroundColor,globals.refresh.borderColor]}
+          ?<FlatList
+            style={design.style.containerb}
+            scrollEnabled={!this.state.isSwiping}
+            data={this.state.data}
+            refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh.bind(this)}
+                colors={[design.theme.COLORS.PRIMARY2,design.theme.COLORS.PRIMARY,design.theme.COLORS.ERROR]}
+              />
+            }
+            ListHeaderComponent={<Text h4 style={design.style.topbudget}>Mis presupuestos</Text>}
+            numColumns={1}
+            renderItem={({item, index}) => this.renderBudget(item,index,itemProps)}
+            initialNumToRender={9}
+            keyExtractor={(item,index)=>index.toString()}
+          /> 
+          :<ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh.bind(this)}
+                colors={[design.theme.COLORS.PRIMARY2,design.theme.COLORS.PRIMARY,design.theme.COLORS.ERROR]}
+              />
+            }
+           >
+            <Block center style={design.style.videoconten}>
+              <Block  flex>
+                <WebView 
+                  ref={(ref) => { this.videoPlayer = ref;}}
+                  scalesPageToFit={true} 
+                  source={{ html: '<html><iframe width="'+design.width * 0.9+'" height="'+design.height /2.5+'" src="https://www.youtube.com/embed/lqyEfqwGCMI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></html>'}} 
+                  onShouldStartLoadWithRequest={this.onShouldStartLoadWithRequest} //for iOS
+                  onNavigationStateChange ={this.onShouldStartLoadWithRequest} //for Android
+                  renderLoading={this.renderLoadingView}
+                  renderError={this.renderError}
+                  style={{width:design.width * 0.9,height:design.height /2.5}}
                 />
-              }
-              numColumns={1}
-              viewabilityConfig={viewabilityConfig}
-              getItemLayout={(data, index) => (
-                {length: globals.img_row.height, offset: globals.img_row.height * index, index}
-              )}
-              renderItem={({item}) => this._renderBudget(item)}
-              initialNumToRender={9}
-              ListHeaderComponent={ 
-                <View>
-                  <H1 style={globals.title}>{I18n.t('budget.title')}</H1>
-                  <View style={{alignItems:'flex-end',marginRight:10}}>
-                    <Picker
-                    selectedValue={this.state.selected}
-                    style={{height: 50, width: 150}}
-                    onValueChange={this.onValueChange.bind(this)}
-                    itemStyle={globals.title}
-                    >
-                    <Picker.Item label={I18n.t('global.filter')} value="1" />
-                    <Picker.Item label={I18n.t('global.filter1')} value="2" />
-                    <Picker.Item label={I18n.t('global.filter2')} value="3" />
-                  </Picker>
-                </View>
-                </View>
-              }
-              ListFooterComponent={ <View style={{paddingBottom: 60}} /> }
-              keyExtractor={(item, index) => index.toString()}
-            />
-            </View>
-           :<View style={{paddingTop:'20%',alignItems: 'center'}}>
-              <Image style={globals.errorimg} resizeMode="contain" source={require("../../../src/general/add.png")} />
-              <Button rounded style={globals.button_login} onPress={() => this.openmodal()}><Text style={{textAlign: 'center'}}>{I18n.t('budget.bempty')}</Text></Button>
-            </View>
+              </Block>
+            </Block>
+          </ScrollView>
         }
-        {this.state.data && this.state.data.length   
-          ?<Fab
-            direction="up"
-            style={globals.iconew}
-            position="bottomRight"
-            onPress={() => this.openmodal()}>
-            <Icon ios='ios-add' android="md-add"/>
-           </Fab>
-          :null
-        }
-        {this._rendermodal(this.state.openfix)}
-        
-      </View>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => this.openmodal()}
+          style={design.style.pushfloating}
+        >
+          <Image
+            source={require('@assets/img/iconos/Writing.png')}
+            style={design.style.floatingButton}
+          />
+        </TouchableOpacity>
+      </Block>
     )
   }
 }
 
 const mapStateToProps = state => {
-  return {budget: state.budget,
-    //suggestions: state.suggestions
-  }
+  return {budget: state.budget}
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-      fetchDataBudget: (id) => {return dispatch(fetchDataBudget(id))},
-      //fetchDataSuggestions: (id) => {return dispatch(fetchDataSuggestions(id))},
-      destroybudget:(data) =>{return dispatch(destroybudget(data))}
-    }
+    fetchDataBudget: (id) => {return dispatch(fetchDataBudget(id))},
+    destroybudget:(data) =>{return dispatch(destroybudget(data))}
+  }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Budget)

@@ -18,7 +18,7 @@
     "mdelete":"Are you sure to delete?",
     "bempty2":"Add products",
     "addbudget":"Add",
-    "newbudget":"New budget",
+    "newbudget":"New budget"
   },
   "configure":{
     "mexit":"Just a minute!",
@@ -53,7 +53,9 @@
     "mwelcome2":"Something went wrong",
     "mwelcome3":"Google Play services not available or outdated",
     "mwelcome4":"Change Language",
-    "mwelcome5":"Select the language"
+    "mwelcome5":"Select the language",
+    "cwelcome6":"Start canceled",
+    "Signup":"Signup"
   },
   "help":{
     "title":"I forgot my password",
@@ -97,6 +99,7 @@
     "conect":"Without internet connection",
     "conect2":"Reconnect",
     "passold":"Forget password help",
+    "passnew":"Change Password",
     "term":"Terms and conditions of our App",
     "term2":"By pressing the Register button Accept the terms and conditions of our App",
     "next":"Jump",
@@ -105,7 +108,8 @@
     "desc":"Description",
     "filter":"Sort By",
     "filter1":"Most recent",
-    "filter1":"Older"
+    "filter1":"Older",
+    "no_price":"Price not available"
    },
   "input":{
     "ipname":"Name",
@@ -115,7 +119,12 @@
     "email":"Mail",
     "pass":"Password",
     "passr":"Repeat password",
-    "date":"Date of purchase"
+    "date":"Date of purchase",
+    "passcurrent":"Current password",
+    "gen":"Gender",
+    "M":"Man",
+    "F":"Woman",
+    "O":"Another",
    },
    "validate":{
     "name1":"The name is required",
@@ -125,9 +134,13 @@
     "user1":"The user is required",
     "user2":"The user must contain at least 3 characters",
     "user3":"The user must not contain more than 20 characters",
-    "pass1":"Password is required",
-    "pass2":"Password must contain at least 5 characters",
+    "useredit":"User update",
+    "pass0":"Password is required",
+    "pass1":"Password must contain at least 6 characters",
+    "show":"Show",
+    "hide":"Hide",
     "pass2":"Password does not match",
+    "pass3":"The password has been successfully changed",
     "login1":"Account does not exist",
     "login2":"Invalid credentials",
     "login3":"Promover granted",
@@ -147,6 +160,8 @@
     "main5":"Budget removed!",
     "main6":"Edited Budget!",
     "error":"Unknown error",
-    "error2":"Network error"
+    "error2":"Network error",
+    "successshop":"Added to favorites",
+    "deteleshop":"Removed from favorites",
    }
 }

@@ -53,7 +53,9 @@
     "mwelcome2":"Algo salió mal",
     "mwelcome3":"Servicios de Google Play no disponibles o desactualizados.",
     "mwelcome4":"Cambiar idioma",
-    "mwelcome5":"Seleccione el idioma"
+    "mwelcome5":"Seleccione el idioma",
+    "cwelcome6":"Inicio cancelado",
+    "Signup":"Iniciar Sesion"
   },
   "help":{
     "title":"Olvide mi contraseña",
@@ -97,6 +99,7 @@
     "conect":"Sin conexión a internet",
     "conect2":"Reconectar",
     "passold":"Olvide la contraseña ayuda",
+    "passnew":"Cambiar contraseña",
     "term":"Términos y condiciones de nuestra App",
     "term2":"Al presionar el botón Registrarse Acepta los términos y condiciones de nuestra App",
     "next":"Saltar",
@@ -105,7 +108,8 @@
     "desc":"Descripción",
     "filter":"Ordenar Por",
     "filter1":"Más reciente",
-    "filter1":"Más Antiguos"
+    "filter1":"Más Antiguos",
+    "no_price":"Precio no disponible"
    },
    "input":{
     "ipname":"Nombre",
@@ -115,7 +119,12 @@
     "email":"Correo",
     "pass":"Contraseña",
     "passr":"Repetir contraseña",
-    "date":"Fecha de compra"
+    "passcurrent":"Contraseña Actual",
+    "date":"Fecha de compra",
+    "gen":"Genero",
+    "M":"Masculino",
+    "F":"Femenino",
+    "O":"Otros",
    },
    "validate":{
     "name1":"El nombre es requerido",
@@ -125,9 +134,13 @@
     "user1":"El usuario es requerido",
     "user2":"El usuario debe contener al menos 3 caracteres",
     "user3":"El usuario no debe contener mas de 20 caracteres",
-    "pass1":"La Contraseña es requerida",
-    "pass2":"La Contraseña debe contener al menos 5 caracteres",
-    "pass2":"La Contraseña no coincide",
+    "pass0":"La Contraseña es requerida",
+    "pass1":"La Contraseña debe contener al menos 6 caracteres",
+    "pass2":"Las contraseñas no coinciden",
+    "pass3":"Se ha cambiado la contraseña satisfactoriamente",
+    "useredit":"Usuario actualizado",
+    "show":"Ver",
+    "hide":"Ocultar",
     "login1":"No existe la cuenta.",
     "login2":"Credenciales invalidas.",
     "login3":"Acceso concedido.",
@@ -147,6 +160,8 @@
     "main5":"Presupuesto eliminado!",
     "main6":"Presupuesto Editado!",
     "error":"Error desconocido",
+    "successshop":"Añadido a favoritos",
+    "deteleshop":"Eliminado de favoritos",
     "error2":"Error de red"
    }
 }

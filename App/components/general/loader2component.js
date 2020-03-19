@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react';
-import {ImageBackground,ActivityIndicator,Modal} from 'react-native';
-import {View} from 'native-base';
+import {ImageBackground,ActivityIndicator,Modal,StatusBar} from 'react-native';
+import {Block, Button, Input, NavBar, Text,Icon} from 'galio-framework';
 //Estilos
-import globals from "../../styles/globals";
+import design from '../../config/style/Style';
 
 class Load2 extends PureComponent {
     
@@ -13,16 +13,17 @@ class Load2 extends PureComponent {
   render() {
     return (
       <Modal
-        animationType='fade'
+        animationType="slide"
         transparent={true}
         visible={this.props.open}
         onRequestClose={() => this.closemodal()}
       >
-        <View style={globals.contenedor_spi}>
-          <ImageBackground resizeMode="contain" source={require("../../src/intro/login.png")} style={{width:45,height:80}}>
-            <ActivityIndicator size={80} color='white' style={globals.spinner2}/>
+        <StatusBar barStyle="dark-content" backgroundColor="#000"/>
+        <Block style={{flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor:'#000',opacity:0.5}}>
+          <ImageBackground resizeMode="contain" source={require("../../assets/img/logo.png")} style={{width: 150,height: 150}}>
           </ImageBackground>
-        </View>
+          <ActivityIndicator size="small" color='white'/>
+        </Block>
       </Modal>
     );
   }

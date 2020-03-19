@@ -19,7 +19,7 @@ export default ShopDReducer = (state = initialState, action) => {
             return {
                 ...state,
                 item: action.data,
-                isFeching: 'false',
+                isFeching: false,
                 error: false
             }
         case FETCHING_DATA_FAILURE_SHOP_D:

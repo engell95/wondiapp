@@ -1,32 +1,33 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import {PostBudget,PostBudgetD,DeleteBudget,Destroybudget,EditBudget,AmountBudget,Postcheck} from '../api';
-import {Toast} from 'native-base';
-import NavigationService from '../../config/NavigationService.js';
+//import {Toast} from 'native-base';
+import { ToastActionsCreators } from 'react-native-redux-toast';
+import NavigationService from '../../config/services/NavigationService.js';
 //idioma
-import I18n from '../../config/LanguageService';
+//import I18n from '../../config/LanguageService';
 
-const exituser = async () =>{
-     try {
-        await AsyncStorage.removeItem('user');
-        await AsyncStorage.removeItem('token');
-        await AsyncStorage.removeItem('id_shopping');
-        await AsyncStorage.removeItem('name_shopping');
-        await AsyncStorage.removeItem('search');
-    } catch (error) {
-        Toast.show({
-            text: I18n.t('validate.error'),
-            buttonText: 'Ok'
-        })
-    }
-    Toast.show({
-        text: I18n.t('validate.login4'),
-        buttonText: 'Ok'
-    })
+export const exituser = () =>{
+    return (dispatch) => {
+    // try {
+         AsyncStorage.removeItem('user');
+         AsyncStorage.removeItem('token');
+         AsyncStorage.removeItem('id_shopping');
+         AsyncStorage.removeItem('name_shopping');
+         AsyncStorage.removeItem('search');
+         AsyncStorage.removeItem('install');
+         AsyncStorage.removeItem('photo');
+   // } catch (error) {
+     //   console.log(error)
+        //dispatch(ToastActionsCreators.displayError(error))
+    //}
+    dispatch(ToastActionsCreators.displayWarning('Session expirada!'));
     NavigationService.navigate('Welcome');
+    }
 }
 
 //Nuevo presupuesto
 export const newbudget = (data) =>{
+    
     return (dispatch) => {
         Postcheck(data)
         .then(([response, json]) => 
@@ -38,10 +39,7 @@ export const newbudget = (data) =>{
                 {  
                     const success = `${JSON.stringify(json.success)}`;
                     if (success == 'false') {
-                        Toast.show({
-                            text: I18n.t('validate.main1'),
-                            buttonText: 'Ok'
-                        })
+                        dispatch(ToastActionsCreators.displayError('Presupuesto no creado!'))
                     }
                     else{
                         const id_shopping = `${JSON.stringify(json.data.Cod_Presupuesto)}`;
@@ -53,49 +51,30 @@ export const newbudget = (data) =>{
                         .then(([response, json2]) => {
                             const success2 = `${JSON.stringify(json2.success)}`;
                             if (success2 == 'false') {
-                                Toast.show({
-                                    text: I18n.t('validate.main2'),
-                                    buttonText: 'Ok'
-                                })
+                                dispatch(ToastActionsCreators.displayError('Producto no guardado!'))
                             }
                             else{
-                                Toast.show({
-                                    text: I18n.t('validate.main3'),
-                                    buttonText: 'Ok'
-                                })
+                                dispatch(ToastActionsCreators.displayInfo('Producto guardado!'))
                             }
                         })
-                        .catch((error) =>{
-                            Toast.show({
-                                text: I18n.t('validate.error'),
-                                buttonText: 'Ok'
-                            })
-                        }) 
+                        .catch((error) => {
+                            dispatch(ToastActionsCreators.displayError(error.toString()))
+                        })
                     }
                 })
-                .catch((error) => {
-                     Toast.show({
-                        text:  I18n.t('validate.error'),
-                        buttonText: 'Ok'
-                    })
-                })
+                .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
             }
             else{
                 dispatch(exituser())
             }
         })
-        .catch((error) => {
-             Toast.show({
-                text:  I18n.t('validate.error'),
-                buttonText: 'Ok'
-            })
-        })
+       .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
     } 
 }
 
 //Nuevo presupuesto
 export const newbudgetacces = (data) =>{   
-    I18n.locale = data.languaje
+    //I18n.locale = data.languaje
     return (dispatch) => {
         Postcheck(data)
         .then(([response, json]) => 
@@ -107,45 +86,30 @@ export const newbudgetacces = (data) =>{
                 {  
                     const success = `${JSON.stringify(json.success)}`;
                     if (success == 'false') {
-                        Toast.show({
-                            text: I18n.t('validate.main1'),
-                            buttonText: 'Ok'
-                        })
+                        dispatch(ToastActionsCreators.displayError('Presupuesto no creado!'))
                     }
                     else{
                         const id_shopping = `${JSON.stringify(json.data.Cod_Presupuesto)}`;
                         let name_shopping = `${JSON.stringify(json.data.N_Presupuesto)}`;
                         AsyncStorage.setItem('id_shopping', id_shopping);
                         AsyncStorage.setItem('name_shopping', name_shopping);
-                        Toast.show({
-                            text: I18n.t('validate.main4'),
-                            buttonText: 'Ok'
-                        })
+                        dispatch(ToastActionsCreators.displayInfo('Presupuesto creado!'))
+                        //NavigationService.navigate('Welcome');
                     }
                 })
-                .catch((error) => {
-                     Toast.show({
-                        text:  I18n.t('validate.error'),
-                        buttonText: 'Ok'
-                    })
-                })
+                .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
             }
             else{
                 dispatch(exituser())
             }
         })
-        .catch((error) => {
-             Toast.show({
-                text:  I18n.t('validate.error'),
-                buttonText: 'Ok'
-            })
-        })
+        .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
     } 
 }
 
 //Agregar detalles a presupuesto
 export const addbudget = (data) =>{ 
-    I18n.locale = data.languaje
+    //I18n.locale = data.languaje
     return (dispatch) => {
        Postcheck(data)
        .then(([response, json]) => 
@@ -157,36 +121,25 @@ export const addbudget = (data) =>{
                 .then(([response, json]) => {
                     const success = `${JSON.stringify(json.success)}`;
                     if (success == 'false') {
-                        Toast.show({
-                            text: I18n.t('validate.main2'),
-                            buttonText: 'Ok'
-                        })
+                        dispatch(ToastActionsCreators.displayError('Producto no guardado!'))
                     }
                     else{  
-                        Toast.show({
-                            text: I18n.t('validate.main3'),
-                            buttonText: 'Ok'
-                        })
+                        dispatch(ToastActionsCreators.displayInfo('Producto guardado!'))
                     }
                 })
-                .catch((error) => console.log(error))
+                .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
             }
             else{
                dispatch(exituser())
             }
         })
-        .catch((error) => {
-             Toast.show({
-                text: I18n.t('validate.error'),
-                buttonText: 'Ok'
-            })
-        })
+        .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
     }
 }
 
 //Eliminar detalles a presupuesto
 export const delbudget = (data) =>{
-    I18n.locale = data.languaje   
+    //I18n.locale = data.languaje   
     return (dispatch) => {
        Postcheck(data)
         .then(([response, json]) => 
@@ -197,29 +150,19 @@ export const delbudget = (data) =>{
                 DeleteBudget(data,id_card)
                 .then(([response, json]) => {
                 })
-                .catch((error) => {
-                    Toast.show({
-                        text: I18n.t('validate.error'),
-                        buttonText: 'Ok'
-                    })
-                })
+                .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
             }
             else{
                 dispatch(exituser())
             }
         })
-        .catch((error) => {
-             Toast.show({
-                text: I18n.t('validate.error'),
-                buttonText: 'Ok'
-            })
-        })
+        .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
     }
 }
 
 //Eliminar presupuesto
 export const destroybudget = (data) =>{
-    I18n.locale = data.languaje   
+    //I18n.locale = data.languaje   
     return (dispatch) => {
        Postcheck(data)
        .then(([response, json]) => 
@@ -228,64 +171,40 @@ export const destroybudget = (data) =>{
             if (json.success) {
                 Destroybudget(data.id)
                 .then(([response, json]) => {
-                    Toast.show({
-                        text: I18n.t('validate.main5'),
-                        buttonText: 'Ok'
-                    })
+                    dispatch(ToastActionsCreators.displayInfo('Presupuesto eliminado!'))
+                    NavigationService.navigate('Budget_ini');
                 })
-                .catch((error) => {
-                    Toast.show({
-                        text: I18n.t('validate.error'),
-                        buttonText: 'Ok'
-                    })
-                })
+                .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
             }
             else{
                 dispatch(exituser())
             }
         })
-        .catch((error) => {
-             Toast.show({
-                text: I18n.t('validate.error'),
-                buttonText: 'Ok'
-            })
-        })  
+        .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
     }
 }
 
 //Edita datos de prosupuesto
 export const editbudget = (data) =>{
+    console.log(data)
     return (dispatch) => {
         Postcheck(data)
         .then(([response, json]) => 
         {  
             const success = `${JSON.stringify(json.success)}`;
+            console.log(json);
             if (json.success) {
                 const id_budget = data.id;
                 EditBudget(data,id_budget)
                 .then(([response, json]) => {
-                    Toast.show({
-                        text: I18n.t('validate.main6'),
-                        buttonText: 'Ok'
-                    })
+                    dispatch(ToastActionsCreators.displayInfo('Presupuesto Editado!'))
                 })
-                .catch((error) => 
-                    Toast.show({
-                        text: error,
-                        buttonText: 'Ok'
-                    })
-                )
             }
             else{
-                dispatch(exituser())
+               dispatch(exituser())
             }
         })
-        .catch((error) => {
-            Toast.show({
-                text: I18n.t('validate.error'),
-                buttonText: 'Ok'
-            })
-        })
+        .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
     }
 }
 
@@ -301,22 +220,12 @@ export const amountbudget = (data) =>{
                 AmountBudget(data,id_budget)
                 .then(([response, json]) => {
                 })
-                .catch((error) =>{ 
-                    Toast.show({
-                        text: I18n.t('validate.error'),
-                        buttonText: 'Ok'
-                    })
-                })
+                .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
             }
             else{
                 dispatch(exituser())
             }
         })
-        .catch((error) => {
-             Toast.show({
-                text: I18n.t('validate.error'),
-                buttonText: 'Ok'
-            })
-        })
+        .catch((error) => dispatch(ToastActionsCreators.displayError(error.toString())))
     }
 }

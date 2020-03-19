@@ -18,7 +18,7 @@ export default ResultReducer = (state = initialState, action) => {
             return {
                 ...state,
                 item: action.data,
-                isFeching: 'false'
+                isFeching: false
             }
         case FETCHING_DATA_FAILURE_RESULT:
             return {

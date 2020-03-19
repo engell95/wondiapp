@@ -1,7 +1,7 @@
 import {FETCHING_DATA_USER, FETCHING_DATA_SUCCESS_USER, FETCHING_DATA_FAILURE_USER} from '../constants'
 
 const initialState =  {
-    data: [],
+    item: [],
     isFeching: true,
     error: false
 }
@@ -11,13 +11,13 @@ export default userReducer = (state = initialState, action) => {
         case FETCHING_DATA_USER:
             return {
                 ...state,
-                data: [],
+                item: [],
                 isFeching: true
             }
         case FETCHING_DATA_SUCCESS_USER:
             return {
                 ...state,
-                data: action.data,
+                item: action.data,
                 isFeching: false
             }
         case FETCHING_DATA_FAILURE_USER:

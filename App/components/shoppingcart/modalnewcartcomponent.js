@@ -1,204 +1,185 @@
-import React, {PureComponent} from 'react'
-import {TouchableOpacity,BackHandler,Dimensions,View,Keyboard} from 'react-native';
-import {ListItem,Body,Right,Left,Text,Icon,Button,ActionSheet,Form,Item,Label,Input,DatePicker} from 'native-base';
-import {connect} from 'react-redux';
-import {newbudgetacces} from '../../redux/actions/mainaction';
-import globals from "../../styles/globals";
+import React, { PureComponent } from 'react';
+import {View,Keyboard,BackHandler,TouchableOpacity,ScrollView,Image,Dimensions,FlatList,StatusBar,Alert,KeyboardAvoidingView} from 'react-native';
+import {Block, Button, Input, NavBar, Text,Icon,theme} from 'galio-framework';
+import design from '@config/style/Style';
+import AsyncStorage from '@react-native-community/async-storage';
 import Dialog, { ScaleAnimation,DialogContent } from 'react-native-popup-dialog';
-//idioma
-import I18n from '../../config/LanguageService';
+import Carousel, { ParallaxImage ,Pagination } from 'react-native-snap-carousel';
+import ProgressiveImage from '@components/image/AsyncImageComponent';
+import DatePicker from 'react-native-datepicker'
+import {newbudgetacces} from '@redux/actions/MainAction';
+import {connect} from 'react-redux';
 import {withNavigation} from 'react-navigation';
-const { width, height } = Dimensions.get('window')
+
+//const { width, height } = Dimensions.get('window')
 
 class Modalcartcomponent extends PureComponent {
-   _isMounted = false;
+	
+	//inicializar variables
+  	constructor(props) {super(props)
+	    this.state = {
+	      	name:'',
+	   		nameError: null,
+	   		chosenDate: new Date(),
+	   		chosenDate1: new Date(),
+      		modalnewacces:props.newmodal2,
+	    };
+	    this.setDate  = this.setDate.bind(this);
+  	}
 
-	constructor(props) {
-    super(props);
-    this.state = {
-    	name:'',
-	   	nameError: null,
-      color:  globals.focus.notfocus,
-	   	chosenDate: new Date(),
-      modalnewacces:props.newmodal2,
+  	setDate(newDate) {this.setState({ chosenDate: newDate });}
+
+  	//formateando fecha
+	formatDate(date) {
+		var d = new Date(date),
+		month = '' + (d.getMonth() + 1),
+		day = '' + d.getDate(),
+		year = d.getFullYear();
+		if (month.length < 2) 
+		    month = '0' + month;
+		if (day.length < 2) 
+			day = '0' + day;
+		return [year, month, day].join('-');
+	}
+
+  	async exitmodalnewacces(){
+		try {
+		    await this.setState({modalnewacces:false,nameError: null,name:''});
+		    await this.props.closemodal();
 		}
-  }
+	    catch(error) {
+	  		Alert.alert('Algo salió mal', 'Ayúdanos a mejorar esta aplicación, mándanos un email a soporte@wondiapp.com con una captura de pantalla del error. Gracias ... \n\n' + error.toString() ,)
+	  	}
+  	}
 
-  componentDidMount() {
-    this._isMounted = true; 
-    BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
-    Keyboard.addListener('keyboardDidShow', this._keyboardDidShow)
-    Keyboard.addListener('keyboardDidHide', this._keyboardDidHide)
-  }
+  	async exitmodalnewacces2(){
+	    try {
+	        await this.setState({modalnewacces:false,nameError: null,name:''});
+	    	await this.props.closemodal2();
+	    }
+	    catch(error) {
+	  		Alert.alert('Algo salió mal', 'Ayúdanos a mejorar esta aplicación, mándanos un email a soporte@wondiapp.com con una captura de pantalla del error. Gracias ... \n\n' + error.toString() ,)
+	  	}
+  	}
 
-  componentWillUnmount() {
-    BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress);
-    this._isMounted = false;
-  }
+  	//validacion de nuevo presupuesto
+	async validate(){
+		this.setState(() => ({ nameError: null}));
+		if (this.state.name.trim() == '') {
+		  this.setState({ nameError:'El nombre es requerido'});
+		} 
+		else if (this.state.name.length < 3) {
+		    this.setState({ nameError: 'El Nombre debe contener al menos 3 caracteres'});
+		}
+		else{
+			try{
+			 	if (this.state.chosenDate.toString() == this.state.chosenDate1.toString()) 
+	        	{	
+		        	var date = this.formatDate(this.state.chosenDate);
+	        	}
+		       else
+		       {
+		        	var date = this.state.chosenDate.split("-").reverse().join("-");
+		       }
+			}
+			catch(error) {
+				Alert.alert('Algo salió mal', 'Ayúdanos a mejorar esta aplicación, mándanos un email a soporte@wondiapp.com con una captura de pantalla del error. Gracias ... \n\n' + error.toString() ,);
+			}
+			finally {
+			    var userfix = Number(this.props.data.user)
+	        	const tokenfix = this.props.data.token.split('"').toString()
+			    try{
+			    	this.props.newbudgetacces({name:this.state.name,user:userfix,date:date,token:tokenfix,languaje:this.props.data.languaje});
+			    }
+				catch(error) {
+					Alert.alert('Algo salió mal', 'Ayúdanos a mejorar esta aplicación, mándanos un email a soporte@wondiapp.com con una captura de pantalla del error. Gracias ... \n\n' + error.toString() ,);
+				}
+				finally {
+				    this.exitmodalnewacces2();
+				}
+			}
+		}
+	}
 
-  handleBackPress = () => {
-    console.log('fix')
-    return true
-  }
+  	_rendermodal3(){
+    	return(
+    		<Dialog
+				visible={this.state.modalnewacces}
+				onTouchOutside={() => {this.exitmodalnewacces()}}
+        		onHardwareBackPress={() => {this.exitmodalnewacces()}}
+				width={0.9}
+				dialogStyle={this.state.dialogStyle}
+				dialogAnimation={new ScaleAnimation()}
+				dialogTitle={
+					<Block style={design.style.headerpop}>
+						<Block style={design.style.headersub}>
+						  	<Text p bold numberOfLines={1} color={design.theme.COLORS.WHITE} style={design.style.textpop}>Nuevo Presupuesto</Text>
+					        <TouchableOpacity onPress={() => this.exitmodalnewacces()}>
+								<Icon
+									family='antdesign'
+									color={design.theme.COLORS.GREY2}
+									size={design.theme.SIZES.BASE * 1.3}
+									name='closecircle'
+								/>
+							</TouchableOpacity> 
+						</Block>
+				    </Block>
+	            }
+			>
+				<DialogContent>
+					<Block style={{marginTop: 10}}>
+						<Input
+							rounded 
+							placeholder="Presupuesto"
+							style={design.style.input3}
+							placeholderTextColor={design.theme.COLORS.PLACEHOLDER}
+							onChangeText={(text) => this.setState({ name: text })}
+						/>
+						{!!this.state.nameError && (
+				            <Text style={design.style.texterror}>{this.state.nameError}</Text>
+				        )}
+						<DatePicker
+							style={{width: '100%',marginTop:10,marginBottom:10}}
+							date={this.state.chosenDate}
+							mode="date"
+							placeholder="Seleccione una fecha"
+							format="DD-MM-YYYY"
+							minDate={this.state.chosenDate1}
+							confirmBtnText="Confirmar"
+							cancelBtnText="Cancelar"
+							customStyles={{
+								dateIcon: {
+								    position: 'absolute',
+								    left: 10,
+								    top: 4,
+								    marginLeft: 10
+								},
+								dateInput: {
+								    borderColor: design.theme.COLORS.PRIMARY2,
+								    borderRadius:22,
+								    height:design.theme.SIZES.INPUT_HEIGHT,
+								    borderWidth: design.theme.SIZES.INPUT_BORDER_WIDTH,
+								}
+							}}
+							onDateChange={(date) => {this.setState({chosenDate: date})}}
+						/>
+						<Block style={design.theme.linenew}/>
+						<Block center style={{justifyContent: 'center',alignItems: 'center',marginTop:15}}>
+						 	<Button round size="small" color={design.theme.COLORS.PRIMARY2} onPress={()=> {this.validate()}}>
+							    Guardar
+							</Button>
+					    </Block>  
+					</Block>
+				</DialogContent>
+			</Dialog>
+    	)
+  	}
 
-  _keyboardDidShow = () => {
-    if (this._isMounted) {
-      this.setState({
-          dialogStyle: {
-              top: -1 * (width / 2),
-              padding: 10,
-              overflow: 'hidden',
-          },
-      })
-    }
-  }
-
-  _keyboardDidHide = () => {
-    if (this._isMounted) {
-      this.setState({
-          dialogStyle: {
-              padding: 10,
-              overflow: 'hidden',
-          },
-      })
-    }
-  }
-
-  exitmodalnewacces = async () => {
-    if (this._isMounted) {
-      try {
-        await this.setState({modalnewacces:false,nameError: null,name:''});
-        await this.props.closemodal();
-      }
-      catch (error) {
-      }
-    }
-  }
-
-  exitmodalnewacces2 = async () => {
-    if (this._isMounted) {
-      try {
-        await this.setState({modalnewacces:false,nameError: null,name:''});
-        await this.props.closemodal2();
-      }
-      catch (error) {
-      }
-    }
-  }
-
-  setDate(newDate) {if (this._isMounted) {this.setState({ chosenDate: newDate });}}
-
-  validate(){
-    if (this._isMounted) {
-      this.setState(() => ({ nameError: null}));
-      if (this.state.name.trim() == '') {
-        this.setState({ nameError: I18n.t('validate.name1'),color:'red'});
-      } 
-      else if (this.state.name.length < 3) {
-        this.setState({ nameError: I18n.t('validate.name2'),color:'red'});
-      } 
-      else{
-        let date =this.state.chosenDate.getFullYear()+"-"+(this.state.chosenDate.getMonth() + 1)+"-"+this.state.chosenDate.getDate();
-        var userfix = Number(this.props.data.user)
-        const tokenfix = this.props.data.token.split('"').toString()
-        this.props.newbudgetacces({name:this.state.name,user:userfix,date:date,token:tokenfix,languaje:this.props.data.languaje});
-        this.exitmodalnewacces2();
-      }
-    }
-  }
-
-  onFocus() {
-    if (this._isMounted) {
-      this.setState({
-        color: globals.focus.color
-      });
-    }
-  }
-
-  onBlur() {
-    if (this._isMounted) {
-      this.setState({
-        color: globals.focus.notfocus
-      });
-    }
-  }
-
-  _rendermodal3(){
-    return(
-      <Dialog
-        visible={this.state.modalnewacces}
-        onTouchOutside={() => {this.exitmodalnewacces()}}
-        onHardwareBackPress={() => {this.exitmodalnewacces()}}
-        width={0.9}
-        animationDuration={100}
-        dialogStyle={this.state.dialogStyle}
-        dialogTitle={
-          <ListItem icon style={globals.view_title}>
-            <Body>
-              <Text numberOfLines={1} style={globals.tex_title_m}>{I18n.t('budget.newbudget')}</Text>
-            </Body>
-            <Right>
-              <TouchableOpacity onPress={() => {this.exitmodalnewacces()}} style={globals.touch_title}>
-                <Icon name='md-close' style={globals.close_ico}/>
-              </TouchableOpacity>
-            </Right>
-          </ListItem>
-        }
-        dialogAnimation={new ScaleAnimation()}
-      >
-        <DialogContent>
-            <Form style={{marginTop:10,marginBottom:20}}>
-              <Item floatingLabel style={[globals.listitemfix,{borderColor:this.state.color}]}>
-                <Label>{I18n.t('input.ipname')}</Label>
-                    <Input  
-                      returnKeyType = { "next" }
-                      onSubmitEditing={() => {this.refs.datePicker.showDatePicker()}}
-                      autoCorrect = {true} 
-                      autoFocus = {true}
-                      value={this.state.name}                  
-                      onChangeText={(text) => this.setState({ name: text })}
-                      onFocus={ () => this.onFocus() } 
-                      onBlur={ () => this.onBlur() }
-                    />
-                  </Item>
-                  {!!this.state.nameError && (
-                      <Text style={globals.texterror}>{this.state.nameError}</Text>
-                  )}
-                  <Item style={[globals.listitemfix,{paddingTop:30}]}>
-                      <Icon active name='md-calendar' />
-                    <DatePicker
-                      ref="datePicker"
-                      defaultDate={Date.now()}
-                      minimumDate={Date.now()}
-                      locale={"en"}
-                      timeZoneOffsetInMinutes={undefined}
-                      modalTransparent={false}
-                      animationType={"fade"}
-                      androidMode={"default"}
-                      placeHolderText={I18n.t('input.date')}
-                      textStyle={{ color: "black"}}
-                      placeHolderTextStyle={globals.textdatepicker}
-                      onDateChange={this.setDate}
-                      disabled={false}
-                    />
-                  </Item>
-                  <Button rounded  
-                    style={[globals.button_login,{marginTop:30}]}
-                    onPress={()=> {this.validate()}}               
-                >
-                    <Text>{I18n.t('global.save')}</Text>
-                </Button>
-            </Form>
-        </DialogContent>
-      </Dialog>
-    )
-  }
-
-	render(){
+  	render(){
 		return(
-      <View>
-        {this._rendermodal3()}
-      </View>
+      		<Block>
+        		{this._rendermodal3()}
+      		</Block>
 		)
 	}
 }

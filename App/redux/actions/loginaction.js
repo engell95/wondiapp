@@ -1,10 +1,11 @@
 import {FETCHING_DATA_LOGIN, FETCHING_DATA_SUCCESS_LOGIN, FETCHING_DATA_FAILURE_LOGIN} from '../constants'
 import AsyncStorage from '@react-native-community/async-storage';
 import {Postlogin} from '../api'
-import {Toast} from 'native-base';
-import NavigationService from '../../config/NavigationService.js';
+//import {Toast} from 'native-base';
+import { ToastActionsCreators } from 'react-native-redux-toast';
+import NavigationService from '../../config/services/NavigationService.js';
 //idioma
-import I18n from '../../config/LanguageService';
+//import I18n from '../../config/services/LanguageService';
 
 export const getData = () => {
     return {type: FETCHING_DATA_LOGIN}
@@ -20,23 +21,18 @@ export const getDataFailure = (data) => {
 
 export const loginpost = (data) =>{   
     return (dispatch) => {
-        //mandando detalles de presupuesto
         Postlogin(data)
             .then(([response, json]) => {
                 const success = `${JSON.stringify(json.success)}`;
-                 
                 if (success == 'false') {
                     if (json.message == 'No existe la cuenta') {
-                        Toast.show({
-                            text: I18n.t('validate.login1'),
-                            buttonText: 'Ok'
-                        })
+                         //console.log(json.message)
+                        dispatch(ToastActionsCreators.displayError('No existe la cuenta.'));
+                        dispatch(getDataSuccess(json))
                     }
                     else{
-                        Toast.show({
-                            text: I18n.t('validate.login2'),
-                            buttonText: 'Ok'
-                        })
+                        dispatch(ToastActionsCreators.displayError('Credenciales invalidas.'));
+                        dispatch(getDataSuccess(json))
                     }
                 }
                 else{
@@ -50,19 +46,14 @@ export const loginpost = (data) =>{
                     if (data.photo) {
                       AsyncStorage.setItem('photo', data.photo);  
                     }
-                    Toast.show({
-                        text: I18n.t('validate.login3'),
-                        buttonText: 'Ok'
-                    })
-                    //NavigationService.navigate('Home');
+                    dispatch(getDataSuccess(json))
+                    dispatch(ToastActionsCreators.displayInfo('Acceso concedido.'));
+                    NavigationService.navigate('Home');
                 }
                 dispatch(getDataSuccess(json))
             })
             .catch((error) => {
-                Toast.show({
-                    text: I18n.t('validate.error2'),
-                    buttonText: 'Ok'
-                })
+                dispatch(ToastActionsCreators.displayError(error.toString()))
             })
     }
 }

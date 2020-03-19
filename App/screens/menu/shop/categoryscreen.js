@@ -1,159 +1,139 @@
-import React, {Component} from 'react';
-import {FlatList,TouchableOpacity,BackHandler,RefreshControl,StatusBar,NetInfo,Image,View,Text} from 'react-native';
-import {Button,Icon,H1} from 'native-base';
-//General
-import OfflineNotice from "../../../components/general/offlinecomponent";
-import Load from '../../../components/loader/loadercomponent';
-import ProgressiveImage from '../../../components/image/progressiveimagecomponent';
-import Empty from "../../../components/general/emptycomponent";
-//Redux
-import {fetchDataCategory} from '../../../redux/actions/categoryaction';
+import React, { PureComponent } from 'react';
+import {FlatList,TouchableOpacity,BackHandler,RefreshControl,StatusBar,NetInfo,Alert,ScrollView} from 'react-native';
+import {Block, Button,Input,NavBar,Icon,Card,theme,Text} from 'galio-framework';
+import design from '@config/style/Style';
+import {loadSettings} from '@config/SettingsStorage';
+import Load   from '@components/general/LoaderComponent';
+import ProgressiveImage from '@components/image/AsyncImageComponent';
+import AsyncStorage from '@react-native-community/async-storage';
+import {fetchDataCategory} from '@redux/actions/CategoryAction';
 import {connect} from 'react-redux';
-import globals from "../../../styles/globals";
-//idioma
-import I18n from '../../../config/LanguageService';
-import {loadSettings} from '../../../config/SettingsStorage';
 
-const viewabilityConfig = {
-  minimumViewTime: 3000,
-  viewAreaCoveragePercentThreshold: 100,
-  waitForInteraction: true,
-};
+const carga = require('@assets/img/carga.png');
+const logo  = require('@assets/img/logo3.png');
 
-class Category extends React.Component {
-  _isMounted = false;
+class Category extends PureComponent{
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      isConnected: true,
-      refreshing: false,
-      data: [], 
-      user:'',
-      token:'',
-      loader:true,
-      languaje:''
-    };
-  }
+ 	//inicializar variables
+  	constructor(props) {super(props)
+	    this.state = {
+	      refreshing: false,
+	      languaje:'',
+	      user:'',
+	      token:'',
+	    };
+  	}
 
-  static navigationOptions = ({ navigation, screenProps }) => ({
-    headerTitle: (
-      <View style={globals.view_nav}>
-        <Image style={globals.logo_header_b} resizeMode="contain" source={require("../../../src/general/header.png")} />
-      </View>
-    ),
-    headerRight:( 
-      <Button transparent style={globals.fix_ico} onPress={() => navigation.navigate("Search")}>
-        <Icon name='search' style={globals.ico_search} />
-      </Button>
-    ),
-    headerTitleStyle: (globals.nav),
-    headerStyle: (globals.navstyle),
-  })
+ 	//verificando datos del usuario y llamando apis
+  	async componentWillMount(){ 
+	    try{
+	      const settings = await loadSettings();
+	      if (settings !== null) {
+	        if (settings.user !== null & settings.token !== null){
+	          this.setState({user:settings.user,languaje:settings.languaje,token:settings.token})
+	          this.props.fetchDataCategory();
+	        }
+	      }
+	    }
+	    catch(error) {Alert.alert('Algo salió mal', 'Ayúdanos a mejorar esta aplicación, mándanos un email a soporte@wondiapp.com con una captura de pantalla del error. Gracias ... \n\n' + error.toString() ,)}
+  	}
 
-  componentDidMount() {
-    this._isMounted = true;
-    NetInfo.isConnected.addEventListener('connectionChange', this.handleConnectionChange);
-    NetInfo.isConnected.fetch().done((isConnected) => { this.setState({isConnected}); });
-  } 
+  	//buscador
+  	searchbutton(){
+	    return(
+	      <Input 
+	        placeholder="  Búsqueda" 
+	        icon="ios-search"
+	        family="ionicon"
+	        left
+	        placeholderTextColor={design.theme.COLORS.TEXT2}
+	        iconColor={design.theme.COLORS.TEXT2}
+	        color={design.theme.COLORS.TEXT}
+	        style={design.style.search}
+	      />
+	    )
+  	}
 
-  componentWillUnmount() {
-    console.log('salio cat')
-    this._isMounted = false;
-    NetInfo.isConnected.removeEventListener('connectionChange', this.handleConnectionChange);
-  }
+  	//refrescando apis
+  	async _onRefresh() {
+	    try{
+	      this.props.fetchDataCategory();
+	    }
+	    catch(error) {
+	      Alert.alert('Algo salió mal', 'Ayúdanos a mejorar esta aplicación, mándanos un email a soporte@wondiapp.com con una captura de pantalla del error. Gracias ... \n\n' + error.toString() ,)
+	    }
+	    finally{
+	      this.setState( { refreshing: false } );
+	    }
+	}
 
-  async componentWillMount(){ 
-    const settings = await loadSettings();
-    if (settings !== null) {
-      if (settings.languaje !== null){
-        I18n.locale = settings.languaje
-      }
-      this.setState({user:settings.user,languaje:settings.languaje,token:settings.token,notif:settings.notif})
-    }
-    this.props.fetchDataCategory();
-  }
+	//seccion de diseño de categorias
+  	_renderItemCatg(item,index){
+	    return(
+	    	<TouchableOpacity 
+	    		style={design.style.content_push4} 
+	    		onPress={() => {this.props.navigation.navigate("Shop_Catg",{user:this.state.user,token:this.state.token,notif:this.state.notif,languaje:this.state.languaje,id:item.Cod_Cat_Empresa,name:item.N_Cat_Empresa})}}
+	    	>	
+			   <Block style={design.style.content_prod4}>
+		          <ProgressiveImage
+		            style={design.style.content_img4}
+		            placeholderSource={carga}
+		            source={{uri: item.Icono}}
+		            border={15}
+		            placeholderColor={design.theme.COLORS.MUTED}
+		          />
+		        </Block>
+		    </TouchableOpacity> 
+	    )
+  	}
 
-  componentDidUpdate(prevProps) {
-    if (this.props.category.item.data !== prevProps.category.item.data) {
-      if (this.props.category.item.data){
-        this.setState({data:this.props.category.item.data,loader:this.props.category.isFeching})
-      }
-    }
-  }
+  	//flatlist
+  	Getflatlist(datas){
+  		if (datas.item.data && datas.item.data.length) {
+  			return(
+  				<FlatList
+		            data={datas.item.data}
+		            numColumns={3}
+              		renderItem={({item}) => this._renderItemCatg(item)}
+			        initialNumToRender={9}
+			        keyExtractor={(item, index) => index.toString()}
+			        ListHeaderComponent={
+			            <Block center>
+	    					<Text h4 bold color={design.theme.COLORS.HEADER} style={{marginBottom:design.width * 0.02,marginTop:design.width * 0.05,textAlign: 'center',fontFamily: "SFProText-Semibold"}}>
+	    						¿En que podemos ayudarte?
+	    					</Text>
+			        	</Block>
+			        }
+            	/>
+  			)
+  		}
+  	}
 
-  handleConnectionChange = (isConnected) => {
-    if (this._isMounted){
-      this.setState({isConnected });
-    }
-  }
+	render() {
 
-  _renderItemCatg(item,index){
-    return(
-      <View style={globals.renderview} >
-        <TouchableOpacity onPress={() => {this.props.navigation.navigate("Shop_Catg",{user:this.state.user,token:this.state.token,notif:this.state.notif,languaje:this.state.languaje,id:item.Cod_Cat_Empresa,name:item.N_Cat_Empresa})}}>
-          <Text numberOfLines={1} style={globals.textheader}>{item.N_Cat_Empresa}</Text>
-          <ProgressiveImage
-            thumbnailSource = {{uri: item.Icono}}
-            style = {globals.img_row}
-            Content = {globals.img_rowc}
-            resizeMode = "cover"
-          />
-        </TouchableOpacity>
-      </View>   
-    )
-  }
+		if (this.props.category.isFeching) {
+      		return <Load/>
+    	}
 
-  _onRefresh = () => {
-    if (this._isMounted){
-      this.setState({refreshing: true,loader:false});
-      this.props.fetchDataCategory();
-      if (this.state.loader = true) {
-        this.setState({refreshing: false})
-      }
-      else{
-        this.setState({refreshing: true})
-      }
-    }
-  }
+    	return(
+    		<Block style={{flex: 1}}>  
+		        <ScrollView
+		          refreshControl={
+		            <RefreshControl
+		              refreshing={this.state.refreshing}
+		              onRefresh={this._onRefresh.bind(this)}
+		              colors={[design.theme.COLORS.PRIMARY2,design.theme.COLORS.PRIMARY,design.theme.COLORS.ERROR]}
+		            />
+		          }
+		        >  
+		        	{/*Categorias disponibles*/}
+          			{this.Getflatlist(this.props.category)}
+            	</ScrollView>	
+    		</Block>
+    	)
 
-  render() {
-    if (!this.state.isConnected) {
-      return <OfflineNotice />;
-    }
+	}    
 
-    if (this.state.loader == true & this.state.refreshing == false){
-      return <Load refreshing={this.state.refreshing} _onRefresh={this._onRefresh.bind(this)}/>;
-    }
-
-    return(
-      <View style={globals.body}>
-        <StatusBar backgroundColor={globals.status.color} barStyle="light-content"/>
-        {this.state.data && this.state.data.length
-          ? <FlatList
-              data={this.state.data}
-              refreshControl={
-                <RefreshControl
-                  refreshing={this.state.refreshing}
-                  onRefresh={this._onRefresh.bind(this)}
-                  colors={[globals.refresh.color,globals.refresh.backgroundColor,globals.refresh.borderColor]}
-                />
-              }
-              numColumns={3}
-              viewabilityConfig={viewabilityConfig}
-              getItemLayout={(data, index) => (
-                {length: globals.img_row.height, offset: globals.img_row.height * index, index}
-              )}
-              renderItem={({item}) => this._renderItemCatg(item)}
-              initialNumToRender={9}
-              ListHeaderComponent={<H1 style={[globals.title,globals.contenttop]}>{I18n.t('categories.title')}</H1>}
-              keyExtractor={(item, index) => index.toString()}
-            />
-          :<Empty refreshing={this.state.refreshing} _onRefresh={this._onRefresh.bind(this)}/>
-        }
-      </View>
-    )
-  }
 }
 
 const mapStateToProps = state => {
@@ -162,7 +142,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    fetchDataCategory: () => {return dispatch(fetchDataCategory())}
+   fetchDataCategory: () => {return dispatch(fetchDataCategory())}
     }
 }
 

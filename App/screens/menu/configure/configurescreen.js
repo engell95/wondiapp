@@ -1,21 +1,20 @@
-import React, {Component} from 'react';
-import {Image,Alert,View,NetInfo,TouchableOpacity,ScrollView,Keyboard,Dimensions} from 'react-native';
-import {Button,Icon,H3,H2,H1,Thumbnail,Form,Input,Label,Item,Text,ListItem,Body,Right,Switch,ActionSheet} from 'native-base';
+import React from 'react';
+import {Alert,View,Keyboard,TouchableOpacity,Picker,StyleSheet,StatusBar,ScrollView,FlatList,RefreshControl,Image,ImageBackground,NetInfo} from 'react-native';
+//estilo
+import {Block, Button, Input, NavBar, Text,Icon,Switch} from 'galio-framework';
+import design from '../../../config/style/Style';
+//componentes
+import Load from '../../../components/general/LoaderComponent';
+import MaterialInitials from '../../../components/image/AvatarComponent';
 import AsyncStorage from '@react-native-community/async-storage';
-import globals from "../../../styles/globals";
-import {NavigationActions} from 'react-navigation';
-import {fetchDataUser} from '../../../redux/actions/useraction';
-import {connect} from 'react-redux';
-//idioma
-import I18n from '../../../config/LanguageService';
 import {loadSettings} from '../../../config/SettingsStorage';
-
-const { width, height } = Dimensions.get('window')
-
-var BUTTONS = [
-  { text: "Español (Nicaragua)", icon: "globe", iconColor: "#002D73" },
-  { text: "English (United States of America)", icon: "globe", iconColor: "#002D73" }
-];
+import Dialog, {DialogContent,ScaleAnimation,DialogTitle,DialogButton,DialogFooter} from 'react-native-popup-dialog';
+//Redux
+import {NavigationActions} from 'react-navigation';
+import {fetchDataUser} from '../../../redux/actions/UserAction';
+import {fetchDataPass} from '../../../redux/actions/PasswordAction';
+import {fetchuseredit} from '../../../redux/actions/UserEditAction';
+import {connect} from 'react-redux';
 
 const Welcome = NavigationActions.navigate({
   routeName: 'Login_ini',
@@ -23,445 +22,412 @@ const Welcome = NavigationActions.navigate({
   action: NavigationActions.navigate({ routeName: 'Welcome' }),
 });
 
-const Initialslide = NavigationActions.navigate({
-  routeName: 'Login_ini',
-  params: {},
-  action: NavigationActions.navigate({ routeName: 'Initialslide' }),
-});
-
 class Configure extends React.Component {
-  _isMounted = false;
+ 	_isMounted = false;
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      isConnected: true,
-      refreshing: false,
-      notificacionios: 'ios-notifications',
-      notificacion: 'md-notifications',
-      photo:null,
-      name:'Eloísa Junieth Quintanilla',
-      email:'eloisa.quintanilla@wondiapp.com',
-      user:'gatitoenarbol',
-      pass1:'arbolllll',
-      pass2:'arbolllll',
-      security1:true,
-      security2:true,
-      eye1:'eye',
-      eye2:'eye',
-      touch1:globals.focus.color,
-      touch2:globals.text.color,
-      touch3:globals.text.color,
-      touch4:globals.text.color,
-      coloruser:globals.notfocus.color,
-      colorname:globals.notfocus.color,
-      colorpass1:globals.notfocus.color,
-      colorpass2:globals.notfocus.color,
-      perfil:true,
-      Switch1:true,
-      Switch2:true,
-      Switch3:true,
-    };
-  }
-
-  static navigationOptions = ({ navigation, screenProps }) => ({
-    headerTitle: (
-      <View style={globals.view_nav}>
-        <Image style={globals.logo_header_b} resizeMode="contain" source={require("../../../src/general/header.png")} />
-      </View>
-    ),
-    headerRight:( 
-      <Button transparent style={globals.fix_ico} onPress={() => navigation.navigate("Search")}>
-        <Icon name='search' style={globals.ico_search} />
-      </Button>
-    ),
-    headerTitleStyle: (globals.nav),
-    headerStyle: (globals.navstyle),
-    headerTintColor: (globals.navstyle.color),
-  })
-
-  componentDidMount() {
-    this._isMounted = true;
-    NetInfo.isConnected.addEventListener('connectionChange', this.handleConnectionChange);
-    NetInfo.isConnected.fetch().done((isConnected) => { this.setState({isConnected}); }); 
-    Keyboard.addListener('keyboardDidShow', this._keyboardDidShow)
-    Keyboard.addListener('keyboardDidHide', this._keyboardDidHide)
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    NetInfo.isConnected.removeEventListener('connectionChange', this.handleConnectionChange);
-  }
-
-  async componentWillMount() {
-    const settings = await loadSettings();
-    if (settings.photo !== null) {
-      this.setState({photo:settings.photo});
+  	constructor(props) {
+    	super(props);
+	    this.state = {
+	      refreshing: false,
+	      photo:null,
+	      data:[],
+	      loader:true,
+	      genero: "Masculino",
+	      modal:false,
+	      name:'No name',
+	      photo:'https://images.unsplash.com/photo-1494252713559-f26b4bf0b174?w=840&q=300',
+	      loader2: false,
+	      visible: false,
+	      password: '',
+	      validPassword:false,
+	      validName: false,
+	      menu:0,
+	      pass1:'',
+	      pass2:' '
+	    };
+    	this.handlenameChange   = this.handlenameChange.bind(this);
+    	this.handlepassChange   = this.handlepassChange.bind(this);
+    	this.handlepass2Change  = this.handlepass2Change.bind(this);
     }
-    if (settings.language !== null) {
-      I18n.locale = settings.languaje
-    }
-    if (settings.notif == 2) {
-      this.setState({notificacionios:'ios-notifications-off',notificacion:'md-notifications-off',Switch1:false}); 
-    }
-    if (settings.vibr == 2) {
-      this.setState({Switch2:false});
-    }
-    if (settings.tono == 2) {
-      this.setState({Switch3:false});
-    }
-  }
 
-  _keyboardDidShow = () => {
-    if (this._isMounted) {
-      this.setState({
+  	static navigationOptions = {header: null};
+
+	componentDidMount() {
+	    this._isMounted = true;
+	    Keyboard.addListener('keyboardDidShow', this._keyboardDidShow)
+	    Keyboard.addListener('keyboardDidHide', this._keyboardDidHide)
+  	}
+
+  	componentWillUnmount() {
+	    this._isMounted = false;
+  	}
+
+ 	async componentWillMount(){ 
+	    try{
+	      const settings = await loadSettings();
+	      if (settings !== null) {
+	        if (settings.user !== null & settings.token !== null){
+	          this.setState({user:settings.user,languaje:settings.languaje,token:settings.token,notif:settings.notif,photo:settings.photo})
+	          this.props.fetchDataUser(settings.user);
+	        }
+	      }
+	    }
+	    catch(error) {Alert.alert('Algo salió mal', error.toString())}
+  	}
+
+ 	componentWillReceiveProps(nextprops){
+	    if(this.props.user.item.data !== nextprops.user.item.data && nextprops.user.isFeching == false){
+	      this.setState({data: nextprops.user.item.data,genr: nextprops.user.item.data.genero,name: nextprops.user.item.data.Nombre})
+	      setTimeout(() => { this.setState({ loader: false});}, 1000);
+	    }
+	    else if (nextprops.user.isFeching == false) {
+	      this.setState({loader:false});
+	    }
+
+	    if(nextprops.pass.item.data !== this.props.pass.item.data && nextprops.pass.isFeching == false){
+	      this.setState({loader2:false,modal: false,pass1:'',pass2:'',pass1Error:null,pass2Error:null});
+	    }
+
+	    if(nextprops.edit.item.data !== this.props.edit.item.data && nextprops.edit.isFeching == false){
+	      this.setState({loader2:false});
+	    }
+  	}
+
+  	_onRefresh = () => {
+	    if (this._isMounted) {
+	      this.setState({refreshing: true,loader:false});
+	      this.props.fetchDataUser(this.state.user);
+	      if (this.state.loader = true) {
+	        this.setState({refreshing: false})
+	      }
+	      else{
+	        this.setState({refreshing: true})
+	      }
+	    }
+  	}
+
+	off = async () => {
+	    try {
+	    	await AsyncStorage.removeItem('user');
+	      	await AsyncStorage.removeItem('token');
+	      	await AsyncStorage.removeItem('id_shopping');
+	      	await AsyncStorage.removeItem('name_shopping');
+	      	await AsyncStorage.removeItem('photo');
+	      	await AsyncStorage.removeItem('notif');
+	      	await AsyncStorage.removeItem('vibr');
+	      	await AsyncStorage.removeItem('tono');
+	      	await AsyncStorage.removeItem('search');
+	      	this.props.navigation.dispatch(Welcome);
+	    } catch(error) {Alert.alert('Algo salió mal', error.toString())}
+  	}
+
+	handlenameChange(name) {
+	    const { validName } = this.state;
+	    this.setState({ name });
+	    if (!validName) {
+	      if (name.length > 4) {
+	        this.setState({ validName: true ,nameError:null});
+	      }
+	      else{
+	        this.setState(() => ({ nameError: 'Nombre debe contener al menos 3 caracteres'}));
+	      }
+	    } else if (name.length <= 4) {
+	      this.setState({ validName: false ,nameError:null});
+	    }
+	}
+
+  	handlepassChange(pass) {
+	    this.setState({pass1: pass });
+	    if (pass.length > 6) {
+	      this.setState({pass1Error:null});
+	    }
+	    else{
+	      this.setState(() => ({ pass1Error: 'La contraseña debe contener al menos 6 caracteres'}));
+	    }
+  	}
+
+  	handlepass2Change(pass) {
+	    this.setState({pass1Error:null,pass2Error:null});
+	    this.setState({pass2: pass });
+	    if (pass.length < 6) {
+	      this.setState(() => ({ pass2Error: 'La contraseña debe contener al menos 6 caracteres'}));
+	    }
+	    else if (pass != this.state.pass1) {
+	      this.setState(() => ({ pass2Error: 'Las contraseñas no coinciden'}));
+	    }
+	    else{
+	      this.setState({pass2Error:null});
+	    }
+  	}
+
+  	update = (index) =>{
+	    if (index == 2) {
+	      this.setState({ pass2Error: null ,pass1Error:null});
+	      if (this.state.pass1.trim() == '') {
+	        this.setState(() => ({ pass1Error: 'La contraseña debe contener al menos 6 caracteres1'}));
+	      }
+	      else if(this.state.pass2.trim() == ''){
+	        this.setState(() => ({ pass2Error: 'La contraseña debe contener al menos 6 caracteres2'}));
+	      }
+	      else if(this.state.pass2.length < 6){
+	        this.setState(() => ({ pass2Error: 'La contraseña debe contener al menos 6 caracteres3'}));
+	      }
+	      else if(this.state.pass1.length < 6){
+	        this.setState(() => ({ pass1Error: 'La contraseña debe contener al menos 6 caracteres4'}));
+	      }
+	      else if(this.state.pass2 != this.state.pass1){
+	        this.setState(() => ({ pass2Error: 'Las contraseñas no coinciden'}));
+	      }
+	      else{
+	        this.setState({visible: false });
+	        this.props.fetchDataPass({Cod_usuario:this.state.user,Password:this.state.pass1})
+	      }
+	    }
+	    else{
+	      this.setState({ generoError: null ,nameError:null});
+	      if (this.state.name.trim() == '') {
+	        this.setState(() => ({ nameError: 'Nombre debe contener al menos 3 caracteres'}));
+	      }
+	      else if(this.state.name.length <= 4){
+	         this.setState(() => ({ nameError: 'Nombre debe contener al menos 3 caracteres'}));
+	      }
+	      else if (this.state.genero.trim() == '') {
+	        this.setState(() => ({ generoError: 'Seleccione el genero'}));
+	      }
+	      else{
+	        this.setState({visible: false });
+	        this.props.fetchuseredit({Cod_usuario:this.state.user,Nombre:this.state.name,genero:this.state.genero,email:this.state.data.email})
+	      }
+	    }
+    }
+
+    _keyboardDidShow = () => {
+        this.setState({
           dialogStyle: {
-              top: -1 * (width / 2),
-              overflow: 'hidden',
+              //top: -1 * (width / 4),
+              //borderRadius: 20,
+              //padding: 10,
+              position: 'absolute', 
+              top: 0
           },
+        })
+    }
+
+    _keyboardDidHide = () => {
+        this.setState({
+            dialogStyle: {
+              //borderRadius: 20,
+              //padding: 10,
+              overflow: 'hidden',
+            },
       })
     }
-  }
 
-  _keyboardDidHide = () => {
-    if (this._isMounted) {
-      this.setState({
-          dialogStyle: {
-              overflow: 'hidden',
-          },
-      })
-    }
-  }
-
-  handleConnectionChange = (isConnected) => {
-    if (this._isMounted) {
-      this.setState({isConnected });
-    }
-  }
-
-  onSecurity= (index) =>{
-    if (this._isMounted) {
-      if (index == 1) {
-        if (this.state.security1 == true) {
-          this.setState({security1: false,eye1:'eye-off'});
-        }
-        else{
-          this.setState({security1: true,eye1:'eye'});
-        }
-      }
-      else{
-        if (this.state.security2 == true) {
-          this.setState({security2: false,eye2:'eye-off'});
-        }
-        else{
-          this.setState({security2: true,eye2:'eye'});
-        }
-      }
-    }
-  }
-
-  onFocus(index) {
-    if (this._isMounted) {
-      if (index == 1) {
-        this.setState({colorname: globals.focus.color});
-      }
-      else if(index == 2){
-        this.setState({coloruser: globals.focus.color});  
-      }
-      else if(index == 3){
-       this.setState({colorpass1: globals.focus.color});  
-      }
-      else{
-       this.setState({colorpass2: globals.focus.color});  
-      }
-    }
-  }
-
-  onBlur() {
-    if (this._isMounted) {
-      this.setState({
-        colorname: globals.notfocus.color,colorpass2:globals.notfocus.color,colorpass1:globals.notfocus.color,coloruser:globals.notfocus.color
-      });
-    }
-  }
-
-  notif = async (index) =>{
-    if (this._isMounted) {
-      if (index == 1) {
-        if (this.state.notificacionios == 'ios-notifications-off') {
-          this.setState({notificacionios:'ios-notifications',notificacion:'md-notifications',Switch1:true});
-          AsyncStorage.setItem('notif', '1'); 
-        }
-        else{
-          this.setState({notificacionios:'ios-notifications-off',notificacion:'md-notifications-off',Switch1:false}); 
-          AsyncStorage.setItem('notif', '2'); 
-        }
-      }
-      else if (index == 2) {
-        if (this.state.Switch2 = true) {
-          this.setState({Switch2:false})
-          AsyncStorage.setItem('vibr', '2'); 
-        }
-        else{
-          this.setState({Switch2:true})
-          AsyncStorage.setItem('vibr', '1'); 
-        }
-      }
-      else {
-        if (this.state.Switch3 = true) {
-          this.setState({Switch3:false})
-          AsyncStorage.setItem('tono', '2'); 
-        }
-        else{
-          this.setState({Switch3:true})
-          AsyncStorage.setItem('tono', '1'); 
-        }
-      }
-    }
-  }
-
-  menu(index) {
-    if (this._isMounted) {
-      if (index == 1) {
-        this.setState({touch1: globals.focus.color,touch2:globals.text.color,touch3:globals.text.color,touch3:globals.text.color,perfil:true});
-      }
-      else if(index == 2){
-       this.setState({touch2: globals.focus.color,touch1:globals.text.color,touch3:globals.text.color,touch3:globals.text.color,perfil:false}); 
-      }
-      else if (index == 3) {
-        this.updatelangu()
-      }
-      else{
-        Alert.alert(
-          I18n.t('configure.mexit'),
-          I18n.t('configure.mexit1'),
-          [
-            {text: I18n.t('global.cancel'), onPress: () => {}, style: 'cancel'},
-            {text: 'Ok', onPress: () => {this.off()}, style: 'destructive'},
-          ],
-          { cancelable: false }
-        )
-      }
-    }
-  }
-
-  updatelangu = () =>{
-    ActionSheet.show(
-      {
-        options: BUTTONS,
-        title: I18n.t('welcome.mwelcome4')
-      },
-      buttonIndex => {this.actions(buttonIndex);}
-    )
-  }
-
-  actions = (index) => {
-    if (this._isMounted) {
-      ActionSheet.hide();
-      if (index == 0) {
-        AsyncStorage.setItem('languaje', 'es');
-        this.props.navigation.dispatch(Initialslide);
-      }
-      else if (index == 1){
-        AsyncStorage.setItem('languaje', 'en');
-        this.props.navigation.dispatch(Initialslide);
-      }
-    }
-  }
-
-  off = async () => {
-    try {
-      await AsyncStorage.removeItem('user');
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('id_shopping');
-      await AsyncStorage.removeItem('name_shopping');
-      await AsyncStorage.removeItem('photo');
-      await AsyncStorage.removeItem('notif');
-      await AsyncStorage.removeItem('vibr');
-      await AsyncStorage.removeItem('tono');
-      await AsyncStorage.removeItem('search');
-      this.props.navigation.dispatch(Welcome);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  _perfil(){
-    return(
-      <View style={globals.viwconfig}>
-        <Text style={globals.h2config}><Icon ios='ios-person' android="md-person" style={globals.iconconfig}/> {I18n.t('configure.perfil')}</Text>
-          <Item disabled floatingLabel style={{marginTop:20,borderColor:'#002D73'}}>
-            <Label>{I18n.t('input.email')}</Label>
-            <Input
-              disabled 
-              value={this.state.email}
-              style={globals.activeTintColor} 
-            />
-          </Item>
-          <Item floatingLabel style={{marginTop:15,borderColor: this.state.colorname}}>
-              <Label>{I18n.t('input.ipname')}</Label>
-              <Input 
-                value={this.state.name}
-                style={globals.activeTintColor} 
-                returnKeyType = { "next" } 
-                onSubmitEditing={(event) => {this.user._root.focus();}}
-                onFocus={ () => this.onFocus(1)} 
-                onBlur={ () => this.onBlur() }
-                onChangeText={(text) => this.setState({ name: text })} 
-              />
-          </Item>
-          <Item floatingLabel style={{marginTop:15,borderColor: this.state.coloruser}}>
-              <Label>{I18n.t('input.user')}</Label>
-              <Input
-                ref={(input) => { this.user= input; }}
-                onSubmitEditing={(event) => {this.pass1._root.focus();}}  
-                value={this.state.user}
-                style={globals.activeTintColor} 
-                returnKeyType = { "next" } 
-                onFocus={ () => this.onFocus(2)} 
-                onBlur={ () => this.onBlur() }
-                onChangeText={(text) => this.setState({ user: text })}
-              />
-          </Item>
-          <Item floatingLabel style={{marginTop:15,borderColor: this.state.colorpass1}}>
-              <Label>{I18n.t('input.pass')}</Label>
-              <Input 
-                ref={(input) => { this.pass1= input; }}
-                onSubmitEditing={(event) => {this.pass2._root.focus();}}  
-                value={this.state.pass1}
-                secureTextEntry={this.state.security1}
-                style={globals.activeTintColor} 
-                returnKeyType = { "next" } 
-                onFocus={ () => this.onFocus(3)} 
-                onBlur={ () => this.onBlur() }
-                autoCorrect={false}
-                maxLength={20}
-                onChangeText={(text) => this.setState({ pass1: text })}
-              />
-              <Icon active name={this.state.eye1} onPress={()=>{this.onSecurity(1)}} style={globals.title2}/>
-          </Item>
-          <Item floatingLabel style={{marginTop:15,borderColor: this.state.colorpass2}}>
-              <Label>{I18n.t('input.passr')}</Label>
-              <Input
-                ref={(input) => { this.pass2= input; }} 
-                value={this.state.pass2}
-                secureTextEntry={this.state.security2}
-                style={globals.activeTintColor} 
-                returnKeyType = { "next" } 
-                onFocus={ () => this.onFocus(4)} 
-                onBlur={ () => this.onBlur() }
-                autoCorrect={false}
-                maxLength={20}
-                onChangeText={(text) => this.setState({ pass2: text })}
-              />
-              <Icon active name={this.state.eye2} onPress={()=>{this.onSecurity(2)}} style={globals.title2}/>
-          </Item>
-          <Button full rounded style={globals.button_login}>
-            <Text>{I18n.t('input.update')}</Text>
-          </Button>
-      </View>
-    )
-  }
-
-  _notif(){
-    return(
-      <View style={globals.viwconfig}>
-        <H2 style={globals.h2config}><Icon ios={this.state.notificacionios} android={this.state.notificacion} style={globals.iconconfig}/> {I18n.t('configure.notif')}</H2>
-        <ListItem icon style={globals.fixlist}>
-          <Body>
-            <Text>{I18n.t('configure.onnotif')}</Text>
-          </Body>
-          <Right>
-            <Switch value={this.state.Switch1} trackColor={{true:"#002D73",false:'#595959'}} thumbColor={"#E4E5E6"} onValueChange={(value) => this.notif(1)}/>
-          </Right>
-        </ListItem>
-        <ListItem icon style={globals.fixlist}>
-          <Body>
-            <Text>{I18n.t('configure.tono')}</Text>
-          </Body>
-          <Right>
-            <Switch value={this.state.Switch2} trackColor={{true:"#002D73",false:'#595959'}} thumbColor={"#E4E5E6"} onValueChange={(value) => this.notif(2)}/>
-          </Right>
-        </ListItem>
-        <ListItem icon style={globals.fixlist}>
-          <Body>
-            <Text>{I18n.t('configure.vib')}</Text>
-          </Body>
-          <Right>
-            <Switch value={this.state.Switch3} trackColor={{true:"#002D73",false:'#595959'}} thumbColor={"#E4E5E6"} onValueChange={(value) => this.notif(3)}/>
-          </Right>
-        </ListItem>
-      </View>
-    )
-  }
-  
-  render() {
-    if (!this.state.isConnected) {
-      return <OfflineNotice />;
+    editinfo(){
+	    return(
+	      <Block>
+	        <StatusBar hidden={this.state.visible} />
+	        <Dialog
+	          visible={this.state.visible}
+	          onTouchOutside={() => {this.setState({ visible: false });}}
+	          onHardwareBackPress={() => {this.setState({ visible: false });}}
+	          width={0.9}
+	          rounded
+	          dialogStyle={this.state.dialogStyle}
+	          dialogTitle={
+	            <Block style={{backgroundColor:design.theme.COLORS.PRIMARY2,paddingTop:design.height * 0.015,paddingBottom:design.height * 0.010,shadowOffset: { width: 2, height: 2 },shadowOpacity: 0.2,elevation: 8}}>
+	              <Block style={{marginLeft:design.width * 0.05,marginRight:design.width * 0.05,flexDirection:'row',justifyContent: 'space-between'}}>
+	                {this.state.menu == 1
+	                ?<Text p bold numberOfLines={1} color={design.theme.COLORS.WHITE} style={{marginLeft:10,width:design.width * 0.7,fontFamily: "SFProText-Semibold"}}>Perfil</Text>
+	                :<Text p bold numberOfLines={1} color={design.theme.COLORS.WHITE} style={{marginLeft:10,width:design.width * 0.7,fontFamily: "SFProText-Semibold"}}>Contraseña</Text>
+	                }
+	                <TouchableOpacity onPress={() =>this.setState({ visible: false })}>
+	                  <Icon
+	                    family='antdesign'
+	                    color={design.theme.COLORS.GREY2}
+	                    size={design.theme.SIZES.BASE * 1.3}
+	                    name='closecircle'
+	                  />
+	                </TouchableOpacity>  
+	              </Block>
+	            </Block>
+	          } 
+	        >
+	          <DialogContent>
+	            {this.state.menu == 1
+	            ?<Block>
+	              <Input
+	                borderless
+	                placeholder="Nombre"
+	                style={design.style.input4}
+	                placeholderTextColor={design.theme.COLORS.TEXT2}
+	                color={design.theme.COLORS.TEXT}
+	                value={this.state.name || "Nombre"}
+	                onChangeText={this.handlenameChange}
+	              />
+	              {!!this.state.nameError && (
+	                <Text style={design.style.texterror}>{this.state.nameError}</Text>
+	              )}
+	              <Text muted size={design.theme.SIZES.FONT * 1}>Genero</Text>
+	              <Picker
+	                //iosHeader="Start Year"
+	                selectedValue={this.state.genero}
+	                style={{width: design.width * 0.8}} 
+	                itemStyle={{height: design.width * 0.30}}         
+	                onValueChange={(itemValue, itemIndex) =>{this.setState({'genero': itemValue})}}
+	              >
+	                <Picker.Item label="Seleccione" value="" />
+	                <Picker.Item label="Masculino" value="Masculino" />
+	                <Picker.Item label="Femenino" value="Femenino" />
+	              </Picker>
+	              {!!this.state.generoError && (
+	                <Text style={design.style.texterror}>{this.state.generoError}</Text>
+	              )}
+	              <Block center style={{justifyContent: 'center',alignItems: 'center',marginTop:15}}>
+	                <Button round size="small" color={design.theme.COLORS.PRIMARY2} style={{height:design.height * 0.06,width:design.width * 0.4}} onPress={() => {this.update()}}>
+	                  Actualizar
+	                </Button>
+	              </Block>
+	             </Block>
+	            :<Block>
+	              <Input
+	                borderless
+	                placeholder="Contraseña nueva"
+	                style={design.style.input4}
+	                placeholderTextColor={design.theme.COLORS.TEXT2}
+	                color={design.theme.COLORS.TEXT}
+	                onChangeText={this.handlepassChange}
+	              />
+	              {!!this.state.pass1Error && (
+	                <Text style={design.style.texterror}>{this.state.pass1Error}</Text>
+	              )}
+	              <Input
+	                borderless
+	                placeholder="Repetir contraseña"
+	                style={design.style.input4}
+	                placeholderTextColor={design.theme.COLORS.TEXT2}
+	                color={design.theme.COLORS.TEXT}
+	                onChangeText={this.handlepass2Change}
+	              />
+	              {!!this.state.pass2Error && (
+	                <Text style={design.style.texterror}>{this.state.pass2Error}</Text>
+	              )}
+	              <Block center style={{justifyContent: 'center',alignItems: 'center',marginTop:15}}>
+	                <Button round size="small" color={design.theme.COLORS.PRIMARY2} style={{height:design.height * 0.06,width:design.width * 0.4}} onPress={() => {this.update(2)}}>
+	                  Actualizar
+	                </Button>
+	              </Block>
+	             </Block>
+	            }
+	          </DialogContent>
+	        </Dialog>
+	      </Block>
+	    )
     }
 
-    return (
-      <View style={globals.body}>
-        <View style={this.state.dialogStyle}>
-          <ScrollView>
-            <View style={globals.contenttop}>
-              <H3 style={globals.title}>{I18n.t('navigation.configuration')}</H3>
-            </View>
-            <View style={globals.viewconfig1}>
-              <View style={globals.nameconfig}>
-                <H1 numberOfLines={2} style={globals.focus}>Eloísa Junieth Quintanilla</H1>
-              </View>
-              <View style={globals.photoconfig}>
-                {this.state.photo != null
-                  ?<Thumbnail large source={{uri:this.state.photo}} />
-                  :<Thumbnail large source={require("../../../src/general/avatar.png")} />
-                }
-              </View>
-            </View> 
-            <View style={{marginLeft:20,marginRight:20,marginTop:15}}>
-              <View style={[globals.viewbudget,{marginBottom:0}]}>
-                <View style={{flexDirection: 'row'}}>
-                  <View style={globals.menuconfig}>
-                    <TouchableOpacity style={globals.object_center2} onPress={ ()=>{this.menu(1)}}>
-                      <Icon ios='ios-person' android="md-person" style={{fontSize:40,color:this.state.touch1}}/>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={globals.menuconfig}>
-                    <TouchableOpacity style={globals.object_center2} onPress={ ()=>{this.menu(2)}}>
-                      <Icon ios={this.state.notificacionios} android={this.state.notificacion} style={{fontSize:40,color:this.state.touch2}}/>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={globals.menuconfig}>
-                    <TouchableOpacity style={globals.object_center2} onPress={ ()=>{this.menu(3)}}>
-                      <Icon type="FontAwesome" ios="language" android="language" style={{fontSize:40,color:this.state.touch3}}/>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={globals.menuconfig}>
-                    <TouchableOpacity style={globals.object_center2} onPress={ ()=>{this.menu(4)}}>
-                      <Icon ios='ios-power' android="md-power" style={{fontSize:40,color:this.state.touch4}}/>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </View>
-            {this.state.perfil
-              ?this._perfil()
-              :this._notif()
-            }
-          </ScrollView>
-        </View>
-      </View>
-    );
-  }
+
+  	render() {
+
+	    if (this.state.loader == true & this.state.refreshing == false){
+	      return <Load refreshing={this.state.refreshing} _onRefresh={this._onRefresh.bind(this)}/>;
+	    }
+
+	   	return ( 
+	    	<Block>
+	      		<ScrollView>
+			        <Block style={{marginTop:design.statusbar,marginLeft:design.width * 0.05,marginRight:design.width * 0.05}}>
+			          <Block>
+			            <MaterialInitials
+			              style={{alignSelf: 'center',marginTop:design.statusbar}}
+			              backgroundColor={'#002976'}
+			              color={'white'}
+			              size={design.width / 3}
+			              text={this.state.name}
+			              single={false}
+			              src={this.state.photo}
+			            />
+			            <Text center h4 style={{marginTop:10}} bold color={'#323643'}>{this.state.data.Nombre}</Text>
+			            <Text center h5>{this.state.data.email}</Text>
+			          </Block>
+			          <Block style={{marginTop:20}}>  
+			            <Text h4 color={'#002976'}>Perfil</Text>
+			            <Block row space="between" style={{alignItems: 'flex-end', marginTop:10,marginBottom:10}}>
+			              <Block>
+			                <Text gray2 style={{ marginBottom: 10 }}>Usuario</Text>
+			                <Text bold>{this.state.data.User}</Text>
+			              </Block>
+			            </Block>
+			            <Block row space="between" style={{alignItems: 'flex-end', marginTop:10,marginBottom:10}}>
+			              <Block>
+			                <Text gray2 style={{ marginBottom: 10 }}>Correo</Text>
+			                <Text bold>{this.state.data.email}</Text>
+			              </Block>
+			            </Block>
+			            <Block row space="between" style={{alignItems: 'flex-end', marginTop:10,marginBottom:10}}>
+			              <Block>
+			                <Text gray2 style={{ marginBottom: 10 }}>Nombre</Text>
+			                <Text bold>{this.state.name}</Text>
+			              </Block>
+			              <TouchableOpacity onPress={()=>{this.setState({ visible: true , menu: 1})}}>
+			                <Text medium secondary>Edit</Text>
+			              </TouchableOpacity>
+			            </Block>
+			            <Block row space="between" style={{alignItems: 'flex-end', marginTop:10,marginBottom:10}}>
+			              <Block>
+			                <Text gray2 style={{ marginBottom: 10 }}>Genero</Text>
+			                <Text bold>{this.state.genero}</Text>
+			              </Block>
+			              <TouchableOpacity onPress={()=>{this.setState({ visible: true , menu: 1})}}>
+			                <Text medium secondary>Edit</Text>
+			              </TouchableOpacity>
+			            </Block>
+			            <Block
+			              row
+			              middle
+			              space="between"
+			              style={{ marginBottom: 10,marginTop:10 }}
+			            >
+			              <Text size={14}>Contraseña</Text>
+			              <TouchableOpacity onPress={()=>{this.setState({ visible: true , menu: 2})}}>
+			                <Text medium secondary>Edit</Text>
+			              </TouchableOpacity>
+			            </Block>
+			          </Block>
+			          <Block style={{marginTop:20}}>    
+			            <Text h4 color={'#002976'}>Preferencias</Text><Text p>(Experimental)</Text>
+			            <Block
+			              row
+			              middle
+			              space="between"
+			              style={{ marginBottom: 10,marginTop:10 }}
+			            >
+			              <Text size={14}>Notifiaciones</Text>
+			              <Switch
+			                value={this.state.notif}
+			                color={'#002976'}
+			                trackColor={'#002976'}
+			                onChange={() => this.setState({notif: !this.state.notif})}
+			              />
+			            </Block>
+			          </Block>
+			          <Button round uppercase color={'#002976'} style={{marginTop:design.width * 0.05,marginBottom:design.width * 0.05}} onPress={()=>{this.off()}}>Cerrar Sesion</Button>
+			        </Block>
+		        	{this.editinfo()}
+	      		</ScrollView>
+			</Block>
+    	)	
+	}
 }
 
 const mapStateToProps = state => {
-  return {user: state.user}
+  return {user: state.user,pass: state.pass,edit:state.useredit}
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    fetchDataUser: () => {return dispatch(fetchDataUser())}
+    fetchDataUser: (id) => {return dispatch(fetchDataUser(id))},
+    fetchDataPass: (data) => {return dispatch(fetchDataPass(data))},
+    fetchuseredit: (data) => {return dispatch(fetchuseredit(data))},
   }
 }
 

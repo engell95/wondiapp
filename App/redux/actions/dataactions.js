@@ -1,7 +1,8 @@
 import {FETCHING_DATA, FETCHING_DATA_SUCCESS, FETCHING_DATA_FAILURE} from '../constants'
 import {fetchShop} from '../api'
-import {Toast} from 'native-base';
-import I18n from '../../config/LanguageService';
+//import {Toast} from 'native-base';
+//import I18n from '../../config/LanguageService';
+import { ToastActionsCreators } from 'react-native-redux-toast';
 
 export const getData = () => {
     return {type: FETCHING_DATA}
@@ -25,9 +26,7 @@ export const fetchDataData = (id) => {
             dispatch(getDataSuccess(json))
         })
         .catch((error) => {
-            Toast.show({
-            text: I18n.t('validate.error2'),
-            buttonText: 'Ok'
-            })
+            dispatch(ToastActionsCreators.displayError(error.toString()))
         })
-    }}
+    }
+}

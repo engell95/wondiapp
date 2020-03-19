@@ -9,28 +9,31 @@ const DEFAULT_SETTINGS = {
   vibr:null,
   tono:null,
   photo:null,
+  theme:1,
 };
 
 export const loadSettings = async () => {
   try {
-    let languaje = await AsyncStorage.getItem('languaje');
-    let user = await AsyncStorage.getItem('user');
-    let install = await AsyncStorage.getItem('install');
-    let token = await AsyncStorage.getItem('token');
-    let notif = await AsyncStorage.getItem('notif');//notificaciones
-    let vibr = await AsyncStorage.getItem('vibr');//vibración
-    let tono = await AsyncStorage.getItem('tono');//tono
-    let photo = await AsyncStorage.getItem('photo');//tono
+    let languaje  = await AsyncStorage.getItem('languaje');//lenguaje
+    let user 	    = await AsyncStorage.getItem('user');//usuario
+    let install   = await AsyncStorage.getItem('install');//verificar instalaci;on
+    let token 	  = await AsyncStorage.getItem('token');//token de acceso
+    let notif 	  = await AsyncStorage.getItem('notif');//notificaciones
+    let vibr 	    = await AsyncStorage.getItem('vibr');//vibración
+    let tono 	    = await AsyncStorage.getItem('tono');//tono
+    let photo 	  = await AsyncStorage.getItem('photo');//foto
+    let theme 	  = await AsyncStorage.getItem('theme');//tema de la aplicacion
     if (languaje == null) { 
     	const DEFAULT_SETTINGS = {
   			install: install,
   			user:user,
-  			languaje: 'en',
+  			languaje: 'es',
   			token:token,
-        notif:notif,
-        vibr:vibr,
-        tono:tono,
-        photo:photo
+	      notif:notif,
+	      vibr:vibr,
+	      tono:tono,
+	      photo:photo,
+	      theme:theme
 		};
     	return DEFAULT_SETTINGS; 
     }
@@ -39,10 +42,11 @@ export const loadSettings = async () => {
   		languaje: languaje,
   		user:user,
   		token:token,
-      notif:notif,
-      vibr:vibr,
-      tono:tono,
-      photo:photo
+      	notif:notif,
+      	vibr:vibr,
+      	tono:tono,
+      	photo:photo,
+      	theme:theme
 	};
     return DEFAULT_SETTINGS;
   } catch (error) {
