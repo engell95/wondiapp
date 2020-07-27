@@ -25,15 +25,15 @@ export const loginpost = (data) =>{
             .then(([response, json]) => {
                 const success = `${JSON.stringify(json.success)}`;
                 if (success == 'false') {
-                    if (json.message == 'No existe la cuenta') {
+                    //if (json.message == 'No existe la cuenta') {
                          //console.log(json.message)
-                        dispatch(ToastActionsCreators.displayError('No existe la cuenta.'));
+                        dispatch(ToastActionsCreators.displayError(json.message));
                         dispatch(getDataSuccess(json))
-                    }
+                    /*}
                     else{
                         dispatch(ToastActionsCreators.displayError('Credenciales invalidas.'));
                         dispatch(getDataSuccess(json))
-                    }
+                    }*/
                 }
                 else{
                     const user = `${JSON.stringify(json.data.id)}`;

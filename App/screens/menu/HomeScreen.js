@@ -1,6 +1,8 @@
 import React, {PureComponent}from 'react';
-import {Alert,TouchableOpacity,ScrollView,FlatList,RefreshControl,Image,ImageBackground} from 'react-native';
+import {StyleSheet,Alert,TouchableOpacity,ScrollView,FlatList,RefreshControl,Image,ImageBackground} from 'react-native';
 import {Block,Input, NavBar, Text,Icon,Switch,Button} from 'galio-framework';
+import Autocomplete from '@components/general/AutocompleteComponent';
+
 import Grid                     from '@components/general/GridComponent'; 
 import design                   from '@config/style/Style';
 import OfflineNotice            from '@components/general/OfflineComponent';
@@ -18,14 +20,14 @@ import {fetchDataPromofull}     from '@redux/actions/PromoFullAction';
 import {fetchDataProductShop}   from '@redux/actions/ProductShopAction';
 import {fetchDataCategory}      from '@redux/actions/CategoryAction';
 import {fetchDataPromox}        from '@redux/actions/PromoProdAction';
+import {fetchDataSearch}        from '@redux/actions/SearchAction';
 import {connect}                from 'react-redux';
 
 const fondo = require('@assets/img/fondo.png');
 const carga = require('@assets/img/carga.png');
 const logo  = require('@assets/img/logo3.png');
 
-class Home extends PureComponent {
-
+class Home extends PureComponent {  
   //inicializar variables
   constructor(props) {super(props)
     this.state = {
@@ -37,7 +39,8 @@ class Home extends PureComponent {
       user:'',
       token:'',
       data7: [],
-      data:[] 
+      data:[],
+      search:[]
     };
     this.currentStepIndex = 0;
     this.nextStep = this.nextStep.bind(this);
@@ -68,6 +71,11 @@ class Home extends PureComponent {
     if(newProps.promodet.item.data !== this.props.promodet.item.data && newProps.promodet.isFeching == false){
       this.setState({data7: newProps.promodet.item.data,loader7:false});
     }
+
+    if(newProps.search.item.data !== this.props.search.item.data && newProps.search.isFeching == false){
+      this.setState({search: [newProps.search.item.data]});
+     
+    }
   }
 
   componentDidUpdate(prevPrps, prevState){
@@ -78,9 +86,11 @@ class Home extends PureComponent {
 
   //aperturando modal
   openpromodet(){
-    const precio_det = Number(this.state.data7[0].Precio).toFixed(2);
-    var Destacado = this.state.data7[0].imagenes__prod.filter(obj => obj.Destacado == 1);
-    this.openmodal(this.state.data7[0].Cod_Producto,this.state.data7[0].N_Producto,this.state.data7[0].Moneda,precio_det,this.state.data7[0].N_Producto,this.state.data7[0].imagenes__prod,Destacado,this.state.data7[0].Descripcion,this.state.data7[0].Cod_Empresa,null,this.state.data7[0].unidad__medida.N_Unidad_Medida,this.state.data7[0].Sucursal);
+    if (this.state.data7 != []) {
+      const precio_det = Number(this.state.data7[0].Precio).toFixed(2);
+      var Destacado = this.state.data7[0].imagenes__prod.filter(obj => obj.Destacado == 1);
+      this.openmodal(this.state.data7[0].Cod_Producto,this.state.data7[0].N_Producto,this.state.data7[0].Moneda,precio_det,this.state.data7[0].N_Producto,this.state.data7[0].imagenes__prod,Destacado,this.state.data7[0].Descripcion,this.state.data7[0].Cod_Empresa,null,this.state.data7[0].unidad__medida.N_Unidad_Medida,this.state.data7[0].Sucursal);
+    }
   }
 
   //asignando valores para abrir el modal
@@ -102,14 +112,19 @@ class Home extends PureComponent {
   //refrescando apis
   async _onRefresh() {
     try{
+      const settings = await loadSettings();
       this.setState({refreshing: true});
-      this.props.fetchDatabestprice();
-      this.props.fetchDatabestsearch();
-      this.props.fetchDatamorebudget();
-      this.props.fetchDatalistuser(24);
-      this.props.fetchDatasimilary(24);
-      this.props.fetchDataPromofull();
-      this.props.fetchDataCategory();
+      if (settings !== null) {
+        if (settings.user !== null & settings.token !== null){
+          this.props.fetchDatabestprice();
+          this.props.fetchDatabestsearch();
+          this.props.fetchDatamorebudget();
+          this.props.fetchDatalistuser(settings.user);
+          this.props.fetchDatasimilary(settings.user);
+          this.props.fetchDataPromofull();
+          this.props.fetchDataCategory();
+        }
+      }
     }
     catch(error) {
       Alert.alert('Algo salió mal', 'Ayúdanos a mejorar esta aplicación, mándanos un email a soporte@wondiapp.com con una captura de pantalla del error. Gracias ... \n\n' + error.toString() ,)
@@ -119,19 +134,37 @@ class Home extends PureComponent {
     }
   }
 
+  //buscar datos
+  searchapi(text){
+    this.setState({search: []})
+    if (text !== '') {
+      try{
+        this.props.fetchDataSearch(text);
+      }
+      catch(error) {
+        Alert.alert('Algo salió mal', 'Ayúdanos a mejorar esta aplicación, mándanos un email a soporte@wondiapp.com con una captura de pantalla del error. Gracias ... \n\n' + error.toString() ,)
+      }
+    }
+    else{
+      this.setState({search: []});
+    }
+  }
+
   //buscador
   searchbutton(){
     return(
-      <Input 
-        placeholder="  Búsqueda" 
-        icon="ios-search"
-        family="ionicon"
-        left
-        placeholderTextColor={design.theme.COLORS.TEXT2}
-        iconColor={design.theme.COLORS.TEXT2}
-        color={design.theme.COLORS.TEXT}
-        style={design.style.search}
-      />
+       <Input 
+          placeholder="  Búsqueda" 
+          icon="ios-search"
+          family="ionicon"
+          left
+          pointerEvents="none"
+          onTouchStart={()=>  this.props.navigation.navigate("Search",{user:this.state.user})}
+          placeholderTextColor={design.theme.COLORS.TEXT2}
+          iconColor={design.theme.COLORS.TEXT2}
+          color={design.theme.COLORS.TEXT}
+          style={design.style.search}
+        />
     )
   }
 
@@ -234,7 +267,7 @@ class Home extends PureComponent {
         <TouchableOpacity onPress={() => {this.openmodal(item.Cod_Producto,item.N_Producto,item.Moneda,precio_det,item.N_Marca,item.imagenes__prod,Destacado,item.Descripcion,item.Cod_Empresa,item.Logo,item.N_Unidad_Medida,item.Sucursal);}}>
           <Block style={design.style.prod_img1_c}>
             {Destacado && Destacado.length
-               ?<ProgressiveImage
+              ?<ProgressiveImage
                   style={design.style.prod_img1}
                   placeholderSource={carga}
                   source={{uri: Destacado[0].URL_Imagen}}
@@ -250,19 +283,19 @@ class Home extends PureComponent {
                   placeholderColor={design.theme.COLORS.MUTED}
                   resizeMode="contain"
                   border={22}
-                 />
+                />
                 :<ProgressiveImage
-                    style={design.style.prod_img1}
-                    placeholderSource={carga}
-                    source={logo}
-                    placeholderColor={design.theme.COLORS.MUTED}
-                    resizeMode="contain"
-                    border={22}
+                  style={design.style.prod_img1}
+                  placeholderSource={carga}
+                  source={logo}
+                  placeholderColor={design.theme.COLORS.MUTED}
+                  resizeMode="contain"
+                  border={22}
                 />
             }
           </Block>
           <Block style={design.style.prod_text1_c}>
-             <Text center style={design.style.textsuc} color={design.theme.COLORS.TEXT3} size={11}>{item.Moneda} {precio_det}</Text>
+            <Text center style={design.style.textsuc} color={design.theme.COLORS.TEXT3} size={11}>{item.Moneda} {precio_det}</Text>
           </Block>
         </TouchableOpacity>
       </Block>  
@@ -299,9 +332,9 @@ class Home extends PureComponent {
                     color={'transparent'}
                     onPress={() => this.nextStep()}
                     style={design.style.btn_next}
-                    >
+                  >
                     <Block><Icon name="chevron-right" family="font-awesome" color={design.theme.COLORS.WHITE} size={25} /></Block>
-                   </Button>
+                  </Button>
                   :null
                 }
               </Block>
@@ -315,7 +348,7 @@ class Home extends PureComponent {
                   Descubre todos tus beneficios   <Icon name="chevron-right" family="font-awesome" color={design.theme.COLORS.PRIMARY2} size={13} />
                 </Text>
               </Button>
-            </Block>
+              </Block>
           </ImageBackground>
         </Block>
       )
@@ -425,7 +458,7 @@ class Home extends PureComponent {
               style={design.style.content_img3}
               placeholderSource={carga}
               source={{uri: Destacado[0].URL_Imagen}}
-              placeholderColor={design.theme.COLORS.MUTED}
+              placeholderColor={design.theme.COLORS.MUTED}  
               resizeMode="contain"
             />
             :data.Logo && data.Logo.length
@@ -493,6 +526,52 @@ class Home extends PureComponent {
   }
 }
 
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#F5FCFF',
+    flex: 1,
+    paddingTop: 25
+  },
+  autocompleteContainer: {
+    marginLeft: 10,
+    marginRight: 10
+  },
+  itemText: {
+    fontSize: 15,
+    margin: 2,
+    paddingLeft:10,
+    paddingRight:10,
+  },
+  infoText: {
+    textAlign: 'center'
+  },
+  titleText: {
+    fontSize: 18,
+    fontWeight: '500',
+    marginBottom: 10,
+    marginTop: 10,
+    textAlign: 'center'
+  },
+  directorText: {
+    color: 'grey',
+    fontSize: 12,
+    marginBottom: 10,
+    textAlign: 'center'
+  },
+  openingText: {
+    textAlign: 'center'
+  },
+   list: {
+    borderColor: '#b9b9b9',
+  borderRadius: 1,
+  borderWidth: 1,
+    backgroundColor: 'white',
+    borderTopWidth: 0,
+    margin: 10,
+    marginTop: 0,
+  }
+});
+
 const mapStateToProps = state => {
   return {
     bestprice : state.bestprice,
@@ -503,6 +582,7 @@ const mapStateToProps = state => {
     promofull : state.promofull,
     category  : state.category,
     promodet  : state.promoprod,
+    search    : state.search,
   }
 }
 
@@ -516,6 +596,7 @@ const mapDispatchToProps = dispatch => {
     fetchDataPromofull:  ()     => {return dispatch(fetchDataPromofull())},
     fetchDataCategory:   ()     => {return dispatch(fetchDataCategory())},
     fetchDataPromox:     (id)   => {return dispatch(fetchDataPromox(id))},
+    fetchDataSearch:     (text)   => {return dispatch(fetchDataSearch(text))},
   }
 }
 

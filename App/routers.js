@@ -25,6 +25,9 @@ import Budget from '@screens/menu/Budget/BudgetScreen';
 import Budget_det from '@screens/menu/Budget/BudgetdetScreen';
 //Configure
 import Configure from '@screens/menu/Configure/ConfigureScreen';
+//Search
+import Search from '@screens/menu/Search/SearchScreen';
+import Result from '@screens/menu/Search/ResultScreen';
 
 const Login_ini  = createStackNavigator(
   {
@@ -48,7 +51,9 @@ const Login_ini  = createStackNavigator(
 //Home
 const Home_Pag = createStackNavigator(
   {
-    Home_ini: Home
+    Home_ini: Home,
+    Search:Search,
+    Result:Result,
   },
   {
     headerMode: 'none',
@@ -62,7 +67,9 @@ const Shop_Pag = createStackNavigator(
   {
     Category: Category,
     Shop_Catg: Shop_Catg,
-    Store_det: Store_det
+    Store_det: Store_det,
+    Search:Search,
+    Result:Result,
   },
   {
     headerMode: 'none',
@@ -75,7 +82,9 @@ const Shop_Pag = createStackNavigator(
 const Budget_Pag = createStackNavigator(
   {
     Budget_ini: Budget,
-    Budget_det: Budget_det
+    Budget_det: Budget_det,
+    Search:Search,
+    Result:Result,
   },
   {
     headerMode: 'none',

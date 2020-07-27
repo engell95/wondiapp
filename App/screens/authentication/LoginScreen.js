@@ -219,7 +219,7 @@ class Login extends React.Component {
   	getInitialState = () => {    
   		if (this.state.email != '' & this.state.password != '') {
   			this.setState({loader:true})
-    		this.props.loginpost({username:this.state.email,password:this.state.password});
+    		this.props.loginpost({email:this.state.email,password:this.state.password});
     		this.closemodalload();
   		}
   		else{
@@ -278,13 +278,13 @@ class Login extends React.Component {
 					                />
 				            	</Block>
 				        	</Block>
-				        	<Text center color={design.theme.COLORS.TEXT2} size={14}>O Inicia Sesión con tú Usuario</Text>
+				        	<Text center color={design.theme.COLORS.TEXT2} size={14}>O Inicia Sesión con tú Correo Electronico</Text>
 			        		<Block center>
 				            	<Block style={{marginTop: 10}}>
 					            	<Input
 						                rounded
 						                type="email-address"
-						                placeholder="Usuario"
+						                placeholder="Correo"
 						                autoCapitalize="none"
 						                style={design.style.input2}
 						                placeholderTextColor={design.theme.COLORS.PLACEHOLDER}

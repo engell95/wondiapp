@@ -89,15 +89,17 @@ class Shop_details extends PureComponent{
 	              	/>
               	</TouchableOpacity>
 			    <Input 
-			    	placeholder="  Búsqueda" 
-			        icon="ios-search"
-			        family="ionicon"
-			        left
-			        placeholderTextColor={design.theme.COLORS.TEXT2}
-			        iconColor={design.theme.COLORS.TEXT2}
-			        color={design.theme.COLORS.TEXT}
-			        style={design.style.search3}
-			    />
+		          placeholder="  Búsqueda" 
+		          icon="ios-search"
+		          family="ionicon"
+		          left
+		          pointerEvents="none"
+		          onTouchStart={()=>  this.props.navigation.navigate("Search",{user:this.state.user})}
+		          placeholderTextColor={design.theme.COLORS.TEXT2}
+		          iconColor={design.theme.COLORS.TEXT2}
+		          color={design.theme.COLORS.TEXT}
+		          style={design.style.search}
+		        />
 	    	</Block>
 	    )
 	}
@@ -276,7 +278,7 @@ class Shop_details extends PureComponent{
 	              placeholderSource={carga}
 	              source={{uri: Destacado[0].URL_Imagen}}
 	              placeholderColor={design.theme.COLORS.MUTED}
-	              //resizeMode="contain"
+	              resizeMode="contain"
 	            />
 	            :data.Logo && data.Logo.length
 	              ?<ProgressiveImage
@@ -284,21 +286,21 @@ class Shop_details extends PureComponent{
 	                placeholderSource={carga}
 	                source={{uri: data.Logo}}
 	                placeholderColor={design.theme.COLORS.MUTED}
-	                //resizeMode="contain"
+	                resizeMode="contain"
 	              />
 	              :<ProgressiveImage 
 	                style={design.style.content_img3}
 	                placeholderSource={carga}
 	                source={logo}
 	                placeholderColor={design.theme.COLORS.MUTED}
-	                //resizeMode="contain"
+	                resizeMode="contain"
 	              />
 	          }
 	        </Block>
-	        <Block style={design.style.content_text}>
-	          <Text numberOfLines={1} center style={design.style.textprod}>{data.item.N_Producto}</Text>
+	        <Block style={design.style.content_text10p}>
+	          <Text numberOfLines={1} center style={design.style.textprod10p}>{data.item.N_Producto}</Text>
 	        </Block>  
-	        <Block style={design.style.content_det}>
+	        <Block style={design.style.content_det10p}>
 	          <Text numberOfLines={1} center style={design.style.textdet} color={design.theme.COLORS.WHITE}>1Und {data.item.Moneda} {precio_det}</Text>
 	        </Block>
 	      </TouchableOpacity>
@@ -310,7 +312,7 @@ class Shop_details extends PureComponent{
  		console.log(datas.item.data.Productos)
 	    if (datas.item.data.Productos && datas.item.data.Productos.length) {
 	      return(
-	        <Block>
+	        <Block style={{marginTop:10}}>
 		        <FlatList
 		            data={datas.item.data.Productos}
 		            renderItem={({ item,index}) => this.renderItemprodV({item,index})}

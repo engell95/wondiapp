@@ -133,15 +133,17 @@ class Shop extends PureComponent{
 	              	/>
               	</TouchableOpacity>
 			    <Input 
-			    	placeholder="  Búsqueda" 
-			        icon="ios-search"
-			        family="ionicon"
-			        left
-			        placeholderTextColor={design.theme.COLORS.TEXT2}
-			        iconColor={design.theme.COLORS.TEXT2}
-			        color={design.theme.COLORS.TEXT}
-			        style={design.style.search3}
-			    />
+		          placeholder="  Búsqueda" 
+		          icon="ios-search"
+		          family="ionicon"
+		          left
+		          pointerEvents="none"
+		          onTouchStart={()=>  this.props.navigation.navigate("Search",{user:this.state.user})}
+		          placeholderTextColor={design.theme.COLORS.TEXT2}
+		          iconColor={design.theme.COLORS.TEXT2}
+		          color={design.theme.COLORS.TEXT}
+		          style={design.style.search}
+		        />
 	    	</Block>
 	    )
 	}
@@ -229,14 +231,14 @@ class Shop extends PureComponent{
 			              placeholderSource={carga}
 			              source={{uri: item.Logo}}
 			              placeholderColor={design.theme.COLORS.MUTED}
-			              //resizeMode="cover"
+			              resizeMode="cover"
 			            />
 			            :<ProgressiveImage
 			              style={design.style.content_img5}
 			              placeholderSource={carga}
 			              source={logo}
 			              placeholderColor={design.theme.COLORS.MUTED}
-			              //resizeMode="cover"
+			              resizeMode="cover"
 			            />
 		        	}
 		        	<Block style={design.style.prod_text2_c}>

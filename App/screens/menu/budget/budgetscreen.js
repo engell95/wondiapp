@@ -224,21 +224,21 @@ class Budget extends PureComponent {
                 />
               </Block>
               <Block style={design.style.part3}>
-                <Text color={design.theme.COLORS.BLACK} h4 style={design.style.textpop2}>
+                <Text color={design.theme.COLORS.BLACK} h5 style={design.style.textpop2}>
                  {item.N_Presupuesto}
                 </Text>
-                <Text color={design.theme.COLORS.MUTED} h5 style={design.style.textpop2}>
+                <Text color={design.theme.COLORS.MUTED} h6 style={design.style.textpop2}>
                  {item.Total_Productos} artículos en lista
                 </Text>
                 {item.Monto_Total.C$ && item.Monto_Total.U$
                   ?<Block style={{flexDirection: 'row',justifyContent: 'space-between'}}>
-                     <Text color={design.theme.COLORS.MUTED} h5 style={design.style.textpop2}>{item.Monto_Total.C$.Moneda} {item.Monto_Total.C$.Monto.toFixed(2)}</Text>
-                     <Text color={design.theme.COLORS.MUTED} h5 style={design.style.textpop2}>{item.Monto_Total.U$.Moneda} {item.Monto_Total.U$.Monto.toFixed(2)}</Text>
+                     <Text color={design.theme.COLORS.MUTED} h6 style={design.style.textpop2}>{item.Monto_Total.C$.Moneda} {item.Monto_Total.C$.Monto.toFixed(2)}</Text>
+                     <Text color={design.theme.COLORS.MUTED} h6 style={design.style.textpop2}>{item.Monto_Total.U$.Moneda} {item.Monto_Total.U$.Monto.toFixed(2)}</Text>
                    </Block>
                   :(item.Monto_Total.C$
-                    ?<Text color={design.theme.COLORS.MUTED} h5 style={design.style.textpop2}>{item.Monto_Total.C$.Moneda} {item.Monto_Total.C$.Monto.toFixed(2)}</Text>
+                    ?<Text color={design.theme.COLORS.MUTED} h6 style={design.style.textpop2}>{item.Monto_Total.C$.Moneda} {item.Monto_Total.C$.Monto.toFixed(2)}</Text>
                     :(item.Monto_Total.U$
-                      ?<Text color={design.theme.COLORS.MUTED} h5 style={design.style.textpop2}>{item.Monto_Total.U$.Moneda} {item.Monto_Total.U$.Monto.toFixed(2)}</Text>
+                      ?<Text color={design.theme.COLORS.MUTED} h6 style={design.style.textpop2}>{item.Monto_Total.U$.Moneda} {item.Monto_Total.U$.Monto.toFixed(2)}</Text>
                       :null
                     )
                   )

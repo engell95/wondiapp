@@ -1,9 +1,5 @@
-//const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImRhYTA2YTBhMjZiNTI4OWQ5ZmQxY2FlMjY4ZTdjZWMxN2VmZTM3NDljNjNhNThmOWYxYWU3NzkwZDAwZWVkZjU3YjMyZjE1ZDdlNTViMDg3In0.eyJhdWQiOiIxIiwianRpIjoiZGFhMDZhMGEyNmI1Mjg5ZDlmZDFjYWUyNjhlN2NlYzE3ZWZlMzc0OWM2M2E1OGY5ZjFhZTc3OTBkMDBlZWRmNTdiMzJmMTVkN2U1NWIwODciLCJpYXQiOjE1NjE3NTg0NTUsIm5iZiI6MTU2MTc1ODQ1NSwiZXhwIjoxNTkzMzgwODU1LCJzdWIiOiI1Iiwic2NvcGVzIjpbXX0.lls4ad6tch6TnoMYHZF_mTjUjgZq5t8O1c3wvIwHS4XKHwNX-HXZZWa10epy_YPaUuIFCziDlQo9faLcKNy7fKA-S0kNx_nnv_xZuY02ywVaDVrGUoWm8CeLW0PtF7ZwfvPHZbT5wIvGLqCwUwBm2OaZpa_SiHOsreeqxhSvB5b_GY25MdffXGKtzUWZXuYFL6UwuguzNZ65hv0GtB_9o3296besjXGn9hG31Xbkk23lwevudKURTlGBEMVkBbnUbBv6uMkYcqsRTgyNX1Tu6XcVEPmIVqZ64JO3psWK4U-DdmWQBPOxftLwO8tjh-67fgEfwG7eDizF0vkmXMGOo3xJjmtvi4Kxm9QjPiJ3p2QPZyy1hygRZMb2oO53cvi7xVXdch6CAsj7qIjIfhAgBArK7B8QoSFllec8XyoSMr8tRvWCZ7-c32nMsEAreioxSJCDifzTvUqvaricTuMSgrxwCEF4SphHdveu8eSAdgHKzw1ActfAGhluztqdZ90A5W3_OS_QkydeYfF7VhV8j-si1qyf-oR84I5L0YhScdSJQEyaoabMVJwAy8QwWhACPri34b-J2dPyPLoa-FYj6jmyRW8Y6pGPXRKfM1ogxuhDJ_kb9e_iDcwdqqxbdzghiSt_wNCzxwLvB2CBpWXLGKy7gp75NbfLW-putsKe0Gs';
-const token ='eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjAxMDUxMWZhNDliNmIyOGVkZDhiZmQyODFkYjQxN2E0ZjMwMzhjZmY4OTMxZjNlMTdiMDBkZjc3MTZlNzBmY2JkYTBhMWYzNjc4MmY0MGJlIn0.eyJhdWQiOiIxIiwianRpIjoiMDEwNTExZmE0OWI2YjI4ZWRkOGJmZDI4MWRiNDE3YTRmMzAzOGNmZjg5MzFmM2UxN2IwMGRmNzcxNmU3MGZjYmRhMGExZjM2NzgyZjQwYmUiLCJpYXQiOjE1NjAxMzcyNDUsIm5iZiI6MTU2MDEzNzI0NSwiZXhwIjoxNTkxNzU5NjQ1LCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.X8Kmuz6hD-LTlInxkb0t6vED9r-NjdDTT4D3wMEi8pB_xOgDssZ3ttXr8OQx1coBkq_IoLQ1k1ylkyLHvehE3E19SLsC5cJtlOXqu4sVrZOgjhXgw0ewB0q63bnu6A-o7TN9OEubUKcNdQCjkv0PxXlQIpxUiksPyyGc7VWLxrgF1yGMZ5AElIxSoZy3B2QFV1gQXZl-8uDy4zf8e37WFvDT_ke3JOpWQTcHll-5CvYazdweCRBxc4pixgPLtYbdObUEZSNJJj8h7yHs3HJ1m9EnJ3EWsgwme_7EyelMoARUf_xLBWaJk_mBZHqMzdXt3f68lSGV1FkiKZLCcIREiB933JxFBOMZ3KCHeRrOaU-LRP0UY-1yPCEisNqTzmdGIFid_NmL2Lw7OYzbX0TFbuIeAFWSiheAtEomdNkZ26PZE338VyIGTlDSwt4PNQ1nJbTpwpZbtHivdKYhE5Bupz_iNj_Wx51y6y06FfyYn2zY4_HcxfQOmQVYR8vq-tcAzUdsvZqoq7omL3BctJC6BxJkTkZ9A98Zber4qXa19ZezB-_wU3jTHTuspgg2Y320s0ffp0kmcKHTkWiC5FH1eqUSxVdVxB2HdYC_GWZtqQ9Kzxj99ZsLiI_6gxomiP5eUEaJop9A6QFSyYPope_ufUJO7plr8QoyojtHXaNTiZk';
+const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjIxZjAyNTMzNzMyMzBhOTU4NTE1MTJiMDk1Mzc0ODQ2ZjM0ZTJkYWIwYjE5NTNhZjA3NDVmY2Q4YjkxNjNlN2VkMmJmNDU1NjZjYWQ1ZTNjIn0.eyJhdWQiOiIxIiwianRpIjoiMjFmMDI1MzM3MzIzMGE5NTg1MTUxMmIwOTUzNzQ4NDZmMzRlMmRhYjBiMTk1M2FmMDc0NWZjZDhiOTE2M2U3ZWQyYmY0NTU2NmNhZDVlM2MiLCJpYXQiOjE1OTE4NDI1NzEsIm5iZiI6MTU5MTg0MjU3MSwiZXhwIjoxNjIzMzc4NTcxLCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.KD8h6KWuFw9e-NQYCyZNJT9FxO7zEe6nQ5BYqu6FBDxrAkNwTxml-8j6KCl6Pvy0z8E6-USe90XipzEu7fSbns9TM9SPPQzO8xZwrA21nboRQlqa7h4QlFYSRkkJrkzFjoQUaKXgarPHmpW2Ycwedp6z2e_IugddCoJ8Lmoh1C_ViLkGOpV9-zDjoxGpxvxU8yC47XBb4Pi1Yz468Jz5ys91pSFZVABeWxkvUBRsxeGqSNEvkZIQjCu_vUtfneSq634yc4xrQKDjsgabV4WBzr2WBtKAmvXbbRG9DK8Ysjsbyz_9zoQNAZLGM3KAGhRB7nJD1eHvLkke_84TXNkhO9BFo6rg7U2x1OnuDsz8PFUdJ12qwnjnN707qYLi-FYxENLaiCFLN-lsFLaXNfcBX1xN0_vVZxBn_ZtqdIv6HcdmAiRH_kNkW_ERzWYomhpwwZZnmL2fQdfwXCrSTkwX4LVNqk4jVxx0_uJAUpKtOA2wsVM1RDsSDGLeTaM7gP8DsfCVVM-EX_550SRwBTLw_X12a7uZJVbilnQwS7uP3r7LLK41UlpgMjP4K4eH-FTS79phq1LHpnMWMGOTHwFrRIObh7dLGWFRLTT8xmBqGMLMj0aG4NSiYslnH66TAYRT6aw9fbU6Ku_SlhpPYAD449V9y4vjQf0C61jp12HwDEI';
 const construc = 'https://test.wondiapp.com/api/';
-//const construc = 'http://10.169.94.103:8080/api/'
-//const construc = 'http://192.168.0.28:8080/api/'
-//const construc = 'http://192.168.88.223:8080/api/'
 
 //Rutas
     //Shop
@@ -14,8 +10,8 @@ const construc = 'https://test.wondiapp.com/api/';
     const budget         = construc+'presupuesto/';
     const budgetpost     = budget  +'crear';
     //Search
-    const search         = construc+'productos/autocomplete/list/';
-    const result         = construc+'buscar/';
+    const search         = construc+'productos/autocomplete/list';
+    const result         = construc+'buscar';
     //General
     const suggestions    = construc+'empresas/categoria/';
     const products       = construc+'empresas/categoria/';
@@ -275,29 +271,36 @@ const construc = 'https://test.wondiapp.com/api/';
         })
     }
 //Search
-    //lista de nombres de productos para auto completar
+    //lista de nombres de productos para auto completar AQUI
     export const fetchSearch =  (val) => {
-        return fetch(search+val, {
-            method: 'GET',
+        return fetch(search, {
+            method: 'POST',
             headers: {
                  Accept: 'application/json',
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer '+token,
-            }
+            },
+            body: JSON.stringify({
+                busqueda: val
+            }),
         })
         .then(Response =>{ 
             return Promise.all([Response, Response.json()])
         })
     }
     //Busqueda 
-    export const fetchResult =  (search) => {
-        return fetch(result+search, {
-            method: 'GET',
+    export const fetchResult =  (data) => {
+        return fetch(result, {
+            method: 'POST',
             headers: {
                  Accept: 'application/json',
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer '+token,
-            }
+            },
+            body: JSON.stringify({
+                busqueda: data.search,
+                usuario: data.user
+            }),
         })
         .then(Response =>{ 
             return Promise.all([Response, Response.json()])
@@ -589,7 +592,7 @@ const construc = 'https://test.wondiapp.com/api/';
             },
             body: JSON.stringify({
                 email:data.email,
-                username: data.username,
+                //username: data.username,
                 password: data.password
             }),
         })

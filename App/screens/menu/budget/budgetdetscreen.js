@@ -285,9 +285,9 @@ class Budget_det extends PureComponent {
 				          		    <Block style={design.style.part1det}>
 				          		    	<Block style={{flex: 1,  flexDirection: 'column',justifyContent: 'space-between',}}>
 				          		    		<Block  style={{marginHorizontal: 10,marginVertical: 10}}>
-				          		    			<Text numberOfLines={1} h5 style={design.style.textpop2} color={design.theme.COLORS.BLACK}>{item.N_Producto}</Text>
-								        		<Text numberOfLines={1} h5 style={design.style.textpop2} color={design.theme.COLORS.GREY}>{item.Marca.N_Marca}</Text>
-							            		<Text numberOfLines={1} h5 style={design.style.textpop2} color={design.theme.COLORS.GREY}>
+				          		    			<Text numberOfLines={1} h6 style={design.style.textpop2} color={design.theme.COLORS.BLACK}>{item.N_Producto}</Text>
+								        		<Text numberOfLines={1} h6 style={design.style.textpop2} color={design.theme.COLORS.GREY}>{item.Marca.N_Marca}</Text>
+							            		<Text numberOfLines={1} h6 style={design.style.textpop2} color={design.theme.COLORS.GREY}>
 							            			{item.Precio.moneda.Simbolo} 
 							            			{this.state[index]? this.state[index] * Number(item.Precio.Precio_Unitario): Math.floor(item.pivot.Cantidad) * Number(item.Precio.Precio_Unitario)}
 							            		</Text>
